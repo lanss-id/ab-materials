@@ -1,0 +1,612 @@
+{
+  "daftar_produk_konstruksi": {
+    "kategori": [
+      {
+        "id": 1,
+        "nama": "Besi 6 (Polos)",
+        "deskripsi": "Baja tulangan polos berbentuk bulat dengan permukaan halus tanpa ulir atau sirip. Digunakan untuk memperkuat struktur beton dengan daya lekat yang baik.",
+        "spesifikasi": [
+          "Material: Baja karbon rendah",
+          "Bentuk: Bulat polos",
+          "Panjang standar: 12 meter",
+          "Toleransi diameter: ±0.3mm"
+        ],
+        "kegunaan": "Pengecoran struktur beton, tulangan sekunder, dan aplikasi konstruksi yang tidak memerlukan daya lekat tinggi",
+        "produk": [
+          {
+            "ukuran": "4,8",
+            "diameter_mm": 4.8,
+            "harga": 22750
+          },
+          {
+            "ukuran": "5,2", 
+            "diameter_mm": 5.2,
+            "harga": 27950
+          },
+          {
+            "ukuran": "6mm Std",
+            "diameter_mm": 6,
+            "harga": 32500
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "nama": "Besi Ulir SNI TS280",
+        "deskripsi": "Baja tulangan ulir dengan sirip melintang untuk daya lekat maksimal sesuai standar SNI dengan kuat tarik minimum 280 MPa.",
+        "spesifikasi": [
+          "Standar: SNI",
+          "Kuat tarik: Min 280 MPa",
+          "Bentuk: Ulir dengan sirip",
+          "Panjang: 12 meter",
+          "Sertifikat: SNI + SPPT"
+        ],
+        "kegunaan": "Tulangan utama struktur beton bertulang, kolom, balok, dan konstruksi yang memerlukan kekuatan tinggi",
+        "merk": ["LYS", "IBD", "HIJ"],
+        "produk": [
+          {
+            "ukuran": "8mm",
+            "diameter_mm": 8,
+            "harga": 48737
+          },
+          {
+            "ukuran": "10mm",
+            "diameter_mm": 10,
+            "harga": 76125
+          },
+          {
+            "ukuran": "12mm",
+            "diameter_mm": 12,
+            "harga": 111108
+          },
+          {
+            "ukuran": "D10MM Ulir",
+            "diameter_mm": 10,
+            "harga": 77022
+          },
+          {
+            "ukuran": "D13MM Ulir",
+            "diameter_mm": 13,
+            "harga": 130065
+          },
+          {
+            "ukuran": "D16MM Ulir",
+            "diameter_mm": 16,
+            "harga": 197699
+          },
+          {
+            "ukuran": "D19MM Ulir",
+            "diameter_mm": 19,
+            "harga": 278788
+          },
+          {
+            "ukuran": "D22MM Ulir",
+            "diameter_mm": 22,
+            "harga": 376740
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "nama": "Besi Non-SNI",
+        "deskripsi": "Baja tulangan kualitas komersial tanpa sertifikasi SNI, cocok untuk konstruksi non-struktural dan aplikasi dengan beban ringan.",
+        "spesifikasi": [
+          "Standar: Non-SNI",
+          "Kualitas: Komersial",
+          "Bentuk: Ulir",
+          "Panjang: 12 meter"
+        ],
+        "kegunaan": "Konstruksi non-struktural, pagar, kanopi, dan aplikasi dengan beban tidak kritis",
+        "sub_kategori": [
+          {
+            "merk": "TJ/MSI",
+            "produk": [
+              {
+                "jenis": "8 TJ/MSI",
+                "diameter_mm": 8,
+                "harga": 43181
+              },
+              {
+                "jenis": "10 TJ/MSI",
+                "diameter_mm": 10,
+                "harga": 67392
+              },
+              {
+                "jenis": "12 TJ/MSI",
+                "diameter_mm": 12,
+                "harga": 97469
+              }
+            ]
+          },
+          {
+            "merk": "SRB/YES",
+            "produk": [
+              {
+                "jenis": "8 SRB/YES",
+                "diameter_mm": 8,
+                "harga": 43160
+              },
+              {
+                "jenis": "10 SRB/YES",
+                "diameter_mm": 10,
+                "harga": 67340
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "nama": "Besi Ulir TS420",
+        "deskripsi": "Baja tulangan ulir berkekuatan tinggi dengan kuat tarik minimum 420 MPa untuk konstruksi struktural yang memerlukan kekuatan ekstra.",
+        "spesifikasi": [
+          "Kuat tarik: Min 420 MPa",
+          "Bentuk: Ulir dengan sirip",
+          "Grade: High Tensile Steel",
+          "Panjang: 12 meter"
+        ],
+        "kegunaan": "Struktur bangunan tinggi, jembatan, konstruksi berat, dan aplikasi dengan beban tinggi",
+        "merk": ["HIJ", "IBD"],
+        "produk": [
+          {
+            "jenis": "D10MM ULIR TS420",
+            "diameter_mm": 10,
+            "harga": 87555
+          },
+          {
+            "jenis": "D13MM ULIR TS420", 
+            "diameter_mm": 13,
+            "harga": 147875
+          },
+          {
+            "jenis": "D16MM ULIR TS420",
+            "diameter_mm": 16,
+            "harga": 224770
+          },
+          {
+            "jenis": "D19MM ULIR TS420",
+            "diameter_mm": 19,
+            "harga": 317070
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "nama": "Sekrup",
+        "deskripsi": "Sekrup khusus konstruksi untuk berbagai aplikasi pemasangan material bangunan dengan daya tahan dan kekuatan optimal.",
+        "spesifikasi": [
+          "Material: Baja berkualitas",
+          "Finishing: Galvanis/phosphate",
+          "Thread: Self-drilling/self-tapping",
+          "Kemasan: Per dus/pack"
+        ],
+        "kegunaan": "Pemasangan gypsum, baja ringan, atap, dan sambungan konstruksi ringan",
+        "produk": [
+          {
+            "jenis": "Gypsum #6 – 1\"",
+            "ukuran": "6 x 25mm",
+            "aplikasi": "Pemasangan papan gypsum ke rangka baja ringan",
+            "harga": 145600
+          },
+          {
+            "jenis": "Gypsum #6 – 1 1/4\"",
+            "ukuran": "6 x 32mm", 
+            "aplikasi": "Pemasangan gypsum tebal atau double layer",
+            "harga": 193440
+          },
+          {
+            "jenis": "Baja Ringan #10–16 (500 pcs)",
+            "ukuran": "10 x 16mm",
+            "aplikasi": "Sambungan antar profil baja ringan",
+            "harga": 143208
+          },
+          {
+            "jenis": "Baja Ringan #10–19 (500 pcs)",
+            "ukuran": "10 x 19mm",
+            "aplikasi": "Sambungan baja ringan dengan material tebal", 
+            "harga": 154440
+          },
+          {
+            "jenis": "Roofing 12x70 (dus)",
+            "ukuran": "12 x 70mm",
+            "aplikasi": "Pemasangan atap spandek/genteng metal ke rangka",
+            "harga": 262080
+          },
+          {
+            "jenis": "Roofing 12x60 (dus)",
+            "ukuran": "12 x 60mm", 
+            "aplikasi": "Pemasangan atap ke rangka dengan ketebalan sedang",
+            "harga": 234000
+          },
+          {
+            "jenis": "Baud / Roofseal (isi 20 set) double layer 10mm",
+            "ukuran": "10mm dengan seal",
+            "aplikasi": "Sambungan kedap air untuk atap dan struktur",
+            "harga": 70200
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "nama": "Kawat Beton",
+        "deskripsi": "Kawat pengikat berkualitas tinggi untuk mengikat tulangan beton dengan kekuatan tarik yang memadai dan tahan korosi.",
+        "spesifikasi": [
+          "Material: Baja karbon rendah",
+          "Diameter: Bervariasi sesuai kebutuhan",
+          "Kemasan: Roll",
+          "Coating: Galvanis (opsional)",
+          "Tensile strength: Sesuai standar"
+        ],
+        "kegunaan": "Mengikat tulangan beton, wiremesh, dan aplikasi pengikat konstruksi",
+        "produk": [
+          {
+            "jenis": "260.000/ROLL",
+            "kemasan": "Per roll",
+            "berat_estimasi": "260kg per roll",
+            "harga": 351520
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "nama": "WD Cutting",
+        "deskripsi": "Mata potong/cutting disc berkualitas untuk memotong material logam, beton, dan batu dengan presisi tinggi.",
+        "spesifikasi": [
+          "Material: Abrasive compound",
+          "Diameter: Bervariasi (4\", 5\", 7\", 9\")",
+          "Ketebalan: Standar industri",
+          "RPM: Sesuai spesifikasi mesin",
+          "Kemasan: Per dus"
+        ],
+        "kegunaan": "Memotong besi, baja, beton, keramik, dan material konstruksi lainnya",
+        "produk": [
+          {
+            "jenis": "60.000/dus",
+            "kemasan": "Per dus",
+            "isi_estimasi": "Sekitar 60 pieces per dus",
+            "harga": 81120
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "nama": "Baja Ringan",
+        "deskripsi": "Profil baja ringan galvanis untuk rangka atap dan struktur ringan dengan kekuatan tinggi dan tahan korosi.",
+        "spesifikasi": [
+          "Material: Cold-formed steel",
+          "Coating: Galvanis/Galvalume",
+          "Panjang: 6 meter",
+          "Standar: JIS/ASTM",
+          "Yield strength: Min 550 MPa"
+        ],
+        "kegunaan": "Rangka atap, partisi, plafon, dan struktur bangunan ringan",
+        "merk": "Bukit",
+        "catatan": "dengan warna khas",
+        "produk": [
+          {
+            "jenis": "C75X0.70",
+            "profil": "C-Channel",
+            "dimensi": "75mm x 0.70mm",
+            "aplikasi": "Rangka utama atap",
+            "harga": 84448
+          },
+          {
+            "jenis": "C75X0.75 (E)",
+            "profil": "C-Channel", 
+            "dimensi": "75mm x 0.75mm",
+            "warna": "Kuning",
+            "aplikasi": "Rangka utama dengan beban sedang",
+            "harga": 90272
+          },
+          {
+            "jenis": "C75X0.75 (F)",
+            "profil": "C-Channel",
+            "dimensi": "75mm x 0.75mm", 
+            "warna": "Ungu",
+            "aplikasi": "Rangka utama dengan beban sedang",
+            "harga": 93576
+          },
+          {
+            "jenis": "R28X0.35",
+            "profil": "Reng",
+            "dimensi": "28mm x 0.35mm",
+            "aplikasi": "Reng/gording untuk genteng",
+            "harga": 42484
+          },
+          {
+            "jenis": "R30X0.40", 
+            "profil": "Reng",
+            "dimensi": "30mm x 0.40mm",
+            "aplikasi": "Reng/gording dengan jarak lebih lebar",
+            "harga": 50388
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "nama": "Holo Gypsum",
+        "deskripsi": "Profil hollow galvanis khusus untuk rangka partisi gypsum dengan dimensi presisi dan ketahanan korosi.",
+        "spesifikasi": [
+          "Material: Galvanized steel",
+          "Bentuk: Hollow rectangular",
+          "Panjang: 3-4 meter",
+          "Finishing: Galvanis",
+          "Ketebalan: 0.3-0.5mm"
+        ],
+        "kegunaan": "Rangka partisi gypsum, plafon drop ceiling, dan struktur interior ringan",
+        "merk": "Bukit",
+        "produk": [
+          {
+            "ukuran": "20X40X0.3",
+            "dimensi": "20mm x 40mm x 0.3mm",
+            "aplikasi": "Rangka partisi ringan",
+            "harga": 16120
+          },
+          {
+            "ukuran": "40X40X0.3",
+            "dimensi": "40mm x 40mm x 0.3mm", 
+            "aplikasi": "Tiang vertikal partisi",
+            "harga": 22568
+          },
+          {
+            "ukuran": "20X40X0.5",
+            "dimensi": "20mm x 40mm x 0.5mm",
+            "aplikasi": "Rangka partisi dengan beban sedang",
+            "harga": 25524
+          },
+          {
+            "ukuran": "40X40X0.5",
+            "dimensi": "40mm x 40mm x 0.5mm",
+            "aplikasi": "Tiang utama partisi dengan beban tinggi", 
+            "harga": 44330
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "nama": "Bondeck",
+        "deskripsi": "Plat baja bergelombang sebagai bekisting permanen untuk pengecoran lantai beton dengan kekuatan struktural.",
+        "spesifikasi": [
+          "Material: Galvanized steel sheet",
+          "Bentuk: Trapezoidal corrugated",
+          "Panjang: 6 meter standar",
+          "Ketebalan: 0.65-0.75mm",
+          "Lebar efektif: 1 meter"
+        ],
+        "kegunaan": "Bekisting lantai cor, struktur komposit baja-beton, dan pengecoran dak beton",
+        "produk": [
+          {
+            "ukuran": "065X1MX6M",
+            "ketebalan": "0.65mm",
+            "dimensi": "1m x 6m",
+            "aplikasi": "Pengecoran lantai ringan", 
+            "harga": 107744
+          },
+          {
+            "ukuran": "070X1MX6M",
+            "ketebalan": "0.70mm",
+            "dimensi": "1m x 6m",
+            "aplikasi": "Pengecoran lantai sedang",
+            "harga": 122304
+          },
+          {
+            "ukuran": "075X1MX6M", 
+            "ketebalan": "0.75mm",
+            "dimensi": "1m x 6m",
+            "aplikasi": "Pengecoran lantai dengan beban tinggi",
+            "harga": 129584
+          }
+        ],
+        "tambahan": {
+          "deskripsi": "Tambahan ukuran di luar 6M",
+          "harga_per_meter": 1456
+        }
+      },
+      {
+        "id": 11,
+        "nama": "Spandek Zincalume AZ-50",
+        "deskripsi": "Atap gelombang dari baja dengan lapisan aluminium-zinc untuk ketahanan korosi superior dan refleksi panas.",
+        "spesifikasi": [
+          "Coating: 55% Aluminum + 43.5% Zinc + 1.5% Silicon",
+          "Ketebalan: 0.35mm",
+          "Lebar efektif: 1m",
+          "Profil: Gelombang",
+          "Panjang: 6 meter"
+        ],
+        "kegunaan": "Atap industri, gudang, rumah tinggal, dan aplikasi yang memerlukan ketahanan cuaca tinggi",
+        "produk": [
+          {
+            "ukuran": "035X1MX6M",
+            "ketebalan": "0.35mm",
+            "dimensi": "1m x 6m", 
+            "grade": "Standard",
+            "harga": 53872
+          },
+          {
+            "ukuran": "035X1MX6M Premium",
+            "ketebalan": "0.35mm",
+            "dimensi": "1m x 6m",
+            "grade": "Premium quality",
+            "harga": 58240
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "nama": "Spandek Pasir", 
+        "deskripsi": "Atap spandek dengan finishing tekstur pasir untuk tampilan estetis dan daya tahan cuaca yang baik.",
+        "spesifikasi": [
+          "Material: Galvanized steel",
+          "Finishing: Textured sand coating",
+          "Ketebalan: 0.30-0.35mm",
+          "Profil: Gelombang",
+          "Panjang: 6 meter"
+        ],
+        "kegunaan": "Atap rumah, bangunan komersial, dan aplikasi yang mengutamakan nilai estetika",
+        "produk": [
+          {
+            "warna": "Merah x6m",
+            "dimensi": "6 meter",
+            "finishing": "Sand texture merah",
+            "harga": 62608
+          },
+          {
+            "warna": "Hitam x6m",
+            "dimensi": "6 meter", 
+            "finishing": "Sand texture hitam",
+            "harga": 62608
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "nama": "Genteng Pasir",
+        "deskripsi": "Genteng metal dengan lapisan pasir alami untuk tampilan seperti genteng keramik dengan kekuatan metal.",
+        "spesifikasi": [
+          "Base material: Galvanized steel",
+          "Coating: Natural sand + acrylic",
+          "Dimensi: Standar genteng",
+          "Ketebalan: 0.30mm",
+          "Bentuk: Bergelombang"
+        ],
+        "kegunaan": "Atap rumah tinggal, villa, dan bangunan yang memerlukan estetika tradisional dengan kekuatan modern",
+        "produk": [
+          {
+            "warna": "Merah",
+            "finishing": "Pasir alami merah",
+            "bentuk": "Genteng bergelombang",
+            "harga": 33488
+          },
+          {
+            "warna": "Hitam",
+            "finishing": "Pasir alami hitam",
+            "bentuk": "Genteng bergelombang", 
+            "harga": 33488
+          }
+        ]
+      },
+      {
+        "id": 14,
+        "nama": "Atap UPVC",
+        "deskripsi": "Atap transparan dari bahan UPVC (Unplasticized Polyvinyl Chloride) tahan UV dan cuaca ekstrem.",
+        "spesifikasi": [
+          "Material: UPVC grade A",
+          "UV Protection: Yes",
+          "Transmisi cahaya: 85-90%",
+          "Ketebalan: 0.8-1.0mm",
+          "Tahan suhu: -40°C hingga +120°C"
+        ],
+        "kegunaan": "Kanopi, skylight, atap carport, greenhouse, dan aplikasi yang memerlukan pencahayaan alami",
+        "produk": [
+          {
+            "jenis": "Putih Doff",
+            "finishing": "Doff/matte white",
+            "transmisi_cahaya": "Sedang", 
+            "aplikasi": "Kanopi dengan pencahayaan lembut",
+            "harga": 111384
+          },
+          {
+            "jenis": "Double Layer (830x10mm)",
+            "struktur": "Double wall",
+            "dimensi": "830mm x 10mm",
+            "aplikasi": "Insulasi termal tinggi",
+            "harga": 668304
+          }
+        ]
+      },
+      {
+        "id": 15,
+        "nama": "Wiremesh",
+        "deskripsi": "Anyaman kawat baja las untuk tulangan beton dengan jarak standar, mempercepat proses pengecoran dan meningkatkan kekuatan struktur.",
+        "spesifikasi": [
+          "Material: Baja karbon rendah",
+          "Sambungan: Las listrik",
+          "Dimensi: 2.1m x 5.4m",
+          "Jarak kawat: 150mm x 150mm",
+          "Standar: SNI/ASTM"
+        ],
+        "kegunaan": "Tulangan lantai cor, jalan beton, plat lantai, dan aplikasi yang memerlukan distribusi beban merata",
+        "produk": [
+          {
+            "ukuran": "M6",
+            "diameter_kawat": "6mm",
+            "dimensi_standar": "2.1m x 5.4m",
+            "jarak_anyam": "15cm x 15cm", 
+            "harga": 287196
+          },
+          {
+            "ukuran": "M7",
+            "diameter_kawat": "7mm", 
+            "dimensi_standar": "2.1m x 5.4m",
+            "jarak_anyam": "15cm x 15cm",
+            "harga": 409500
+          },
+          {
+            "ukuran": "M8",
+            "diameter_kawat": "8mm",
+            "dimensi_standar": "2.1m x 5.4m", 
+            "jarak_anyam": "15cm x 15cm",
+            "harga": 556920
+          },
+          {
+            "ukuran": "M10",
+            "diameter_kawat": "10mm",
+            "dimensi_standar": "2.1m x 5.4m",
+            "jarak_anyam": "15cm x 15cm",
+            "harga": 922740
+          }
+        ]
+      },
+      {
+        "id": 16,
+        "nama": "Paku Cap Wallet",
+        "deskripsi": "Paku dengan kepala lebar khusus untuk aplikasi konstruksi dan pekerjaan kayu dengan daya tahan tinggi.",
+        "spesifikasi": [
+          "Material: Baja karbon",
+          "Head: Wide cap design",
+          "Finishing: Galvanis/black oxide",
+          "Kemasan: Per kg",
+          "Shank: Smooth/spiral"
+        ],
+        "kegunaan": "Konstruksi kayu, pemasangan triplek, papan, dan aplikasi yang memerlukan kepala paku lebar",
+        "produk": [
+          {
+            "ukuran": "1,5\" (4CM)",
+            "panjang": "40mm",
+            "diameter": "Standar",
+            "aplikasi": "Kayu tipis dan triplek",
+            "harga": 362544
+          },
+          {
+            "ukuran": "2\" (5CM)",
+            "panjang": "50mm", 
+            "diameter": "Standar",
+            "aplikasi": "Papan kayu sedang",
+            "harga": 347808
+          },
+          {
+            "ukuran": "3\" (7CM)",
+            "panjang": "70mm",
+            "diameter": "Standar", 
+            "aplikasi": "Konstruksi kayu tebal",
+            "harga": 347808
+          },
+          {
+            "ukuran": "4\" (10CM)",
+            "panjang": "100mm",
+            "diameter": "Standar",
+            "aplikasi": "Konstruksi kayu berat",
+            "harga": 347802
+          },
+          {
+            "ukuran": "5\" (12CM)",
+            "panjang": "120mm",
+            "diameter": "Standar", 
+            "aplikasi": "Konstruksi kayu ekstra tebal",
+            "harga": 347802
+          }
+        ]
+      }
+    ]
+  }
+}
