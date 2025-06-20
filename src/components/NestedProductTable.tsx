@@ -11,6 +11,7 @@ import {
   DollarSign
 } from 'lucide-react';
 import constructionData from '../data/construction_products_json.json';
+import QuantityControl from './QuantityControl';
 
 interface Product {
   ukuran?: string;
@@ -41,13 +42,19 @@ interface NestedProductTableProps {
   onDeleteProduct?: (categoryId: number, index: number) => void;
   onAddProduct?: (categoryId: number) => void;
   isAdminMode?: boolean;
+  quantities: { [key: string]: number };
+  onQuantityChange: (key: string, value: number) => void;
+  discountPercent?: number;
 }
 
 const NestedProductTable: React.FC<NestedProductTableProps> = ({
   onEditProduct,
   onDeleteProduct,
   onAddProduct,
-  isAdminMode = false
+  isAdminMode = false,
+  quantities,
+  onQuantityChange,
+  discountPercent = 0
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedSubCategories, setExpandedSubCategories] = useState<Set<string>>(new Set());
@@ -86,6 +93,8 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
     return product.ukuran || product.jenis || 'Produk';
   };
 
+  const getRowKey = (categoryId: number, index: number, subKey?: string) => `${categoryId}-${index}-${subKey || 'main'}`;
+
   const renderProductRow = (
     product: Product, 
     categoryId: number, 
@@ -94,7 +103,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
     subCategoryKey?: string
   ) => (
     <tr 
-      key={`${categoryId}-${index}-${subCategoryKey || 'main'}`}
+      key={getRowKey(categoryId, index, subCategoryKey)}
       className={`${isSubProduct ? 'bg-slate-50' : 'bg-white'} hover:bg-blue-50 transition-colors duration-200`}
     >
       <td className={`px-6 py-4 ${isSubProduct ? 'pl-12' : ''}`}>
@@ -130,10 +139,30 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
       </td>
       
       <td className="px-6 py-4">
-        <div className="text-lg font-bold text-blue-700">
-          {formatPrice(product.harga)}
-        </div>
+        {discountPercent > 0 ? (
+          <>
+            <div className="flex items-center space-x-2 mb-1">
+              <span className="text-lg text-slate-400 line-through">{formatPrice(product.harga)}</span>
+              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">-{discountPercent}%</span>
+            </div>
+            <div className="text-lg font-bold text-blue-700">
+              {formatPrice(product.harga * (1 - discountPercent / 100))}
+            </div>
+          </>
+        ) : (
+          <div className="text-lg font-bold text-blue-700">
+            {formatPrice(product.harga)}
+          </div>
+        )}
         <div className="text-xs text-slate-500">per unit</div>
+      </td>
+      
+      <td className="px-6 py-4">
+        <QuantityControl
+          value={quantities[getRowKey(categoryId, index, subCategoryKey)] || 0}
+          onChange={(val) => onQuantityChange(getRowKey(categoryId, index, subCategoryKey), val)}
+          min={0}
+        />
       </td>
       
       <td className="px-6 py-4">
@@ -157,10 +186,37 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
             </>
           ) : (
             <>
-              <button className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2">
-                <ShoppingCart className="h-4 w-4" />
-                <span>Beli</span>
-              </button>
+              {(() => {
+                const qty = quantities[getRowKey(categoryId, index, subCategoryKey)] || 0;
+                const namaProduk = getProductName(product);
+                const hargaSatuan = discountPercent > 0 ? product.harga * (1 - discountPercent / 100) : product.harga;
+                const subtotal = hargaSatuan * qty;
+                const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${namaProduk}\nHarga Satuan: Rp${hargaSatuan.toLocaleString('id-ID')}\nJumlah: ${qty}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
+                const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
+                if (qty > 0) {
+                  return (
+                    <a
+                      href={waHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Beli</span>
+                    </a>
+                  );
+                }
+                return (
+                  <button
+                    className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed flex items-center space-x-2"
+                    disabled
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    <span>Beli</span>
+                  </button>
+                );
+              })()}
               <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
                 Detail
               </button>
@@ -182,7 +238,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         className="bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 cursor-pointer transition-all duration-200"
         onClick={() => toggleCategory(category.id)}
       >
-        <td colSpan={4} className="px-6 py-4">
+        <td colSpan={5} className="px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
@@ -195,21 +251,123 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-800">{category.nama}</h3>
-                <p className="text-sm text-slate-600 mt-1">{category.deskripsi}</p>
+                <p
+                  className={`text-sm text-slate-600 mt-1 ${!isExpanded ? 'line-clamp-1' : ''}`}
+                >
+                  {category.deskripsi}
+                </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                {productCount} produk
-              </div>
+            <div
+              className="flex items-center space-x-4 w-full"
+              style={{
+                minWidth: 0,
+                justifyContent: 'flex-end',
+                flexWrap: 'nowrap',
+                gap: '1rem',
+              }}
+            >
+              {(() => {
+                // Ambil semua produk dari kategori dan sub_kategori
+                const allProducts = [
+                  ...(category.produk || []),
+                  ...((category.sub_kategori || []).flatMap(sub => sub.produk || []))
+                ];
+                if (allProducts.length === 0) {
+                  return (
+                    <div
+                      className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
+                      style={{
+                        minWidth: 120,
+                        maxWidth: 160,
+                        width: 120,
+                        height: 32,
+                        borderRadius: 8,
+                        padding: '0 12px',
+                        whiteSpace: 'nowrap',
+                        textAlign: 'right',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      Tidak ada produk
+                    </div>
+                  );
+                }
+                // Ambil semua harga produk
+                const prices = allProducts
+                  .map((p: any) => p.harga)
+                  .filter((h: any) => typeof h === 'number');
+                if (prices.length === 0) {
+                  return (
+                    <div
+                      className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
+                      style={{
+                        minWidth: 120,
+                        maxWidth: 160,
+                        width: 120,
+                        height: 32,
+                        borderRadius: 8,
+                        padding: '0 12px',
+                        whiteSpace: 'nowrap',
+                        textAlign: 'right',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      Tidak ada harga
+                    </div>
+                  );
+                }
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                // Format harga menjadi singkat, misal 22000 => 22k
+                const formatShort = (value: number) => {
+                  if (value >= 1_000_000) {
+                    return (value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1) + 'jt';
+                  }
+                  if (value >= 1_000) {
+                    return (value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1) + 'k';
+                  }
+                  return value.toString();
+                };
+                return (
+                  <div
+                    className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
+                    style={{
+                      minWidth: 120,
+                      maxWidth: 160,
+                      width: 120,
+                      height: 32,
+                      borderRadius: 8,
+                      padding: '0 12px',
+                      whiteSpace: 'nowrap',
+                      textAlign: 'right',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {minPrice === maxPrice
+                      ? ` ${formatShort(minPrice)}`
+                      : ` ${formatShort(minPrice)} - ${formatShort(maxPrice)}`}
+                  </div>
+                );
+              })()}
               {isAdminMode && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onAddProduct?.(category.id);
                   }}
-                  className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200"
+                  className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
                   title="Tambah Produk"
+                  style={{
+                    minWidth: 36,
+                    minHeight: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                 >
                   <Plus className="h-4 w-4" />
                 </button>
@@ -231,7 +389,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         className="bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors duration-200"
         onClick={() => toggleSubCategory(subKey)}
       >
-        <td colSpan={4} className="px-6 py-3 pl-12">
+        <td colSpan={5} className="px-6 py-3 pl-12">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
@@ -285,9 +443,11 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 <div className="flex items-center space-x-1">
-                  <DollarSign className="h-4 w-4" />
                   <span>Harga</span>
                 </div>
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                Kuantitas
               </th>
               <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
                 Aksi

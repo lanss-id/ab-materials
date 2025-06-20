@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ShoppingCart, Info, Star, Truck } from 'lucide-react';
+import QuantityControl from './QuantityControl';
 
 interface Product {
   ukuran?: string;
@@ -17,8 +18,11 @@ interface ProductCardProps {
   categoryName: string;
   isPromoted?: boolean;
   discountPercent?: number;
+  hargaDiskon?: number;
   onAddToCart?: () => void;
   onViewDetails?: () => void;
+  quantity: number;
+  onQuantityChange: (value: number) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -26,8 +30,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   categoryName,
   isPromoted = false,
   discountPercent = 0,
+  hargaDiskon,
   onAddToCart,
-  onViewDetails
+  onViewDetails,
+  quantity,
+  onQuantityChange
 }) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -38,7 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const originalPrice = product.harga;
-  const discountedPrice = discountPercent > 0 ? originalPrice * (1 - discountPercent / 100) : originalPrice;
+  const finalPrice = discountPercent > 0 && hargaDiskon ? hargaDiskon : originalPrice;
 
   const productName = product.ukuran || product.jenis || 'Produk';
 
@@ -105,17 +112,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Pricing */}
         <div className="mb-4">
+          {discountPercent > 0 && (
+            <div className="flex items-center space-x-2 mb-1">
+              <span className="text-lg text-slate-400 line-through">{formatPrice(originalPrice)}</span>
+              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">-{discountPercent}%</span>
+            </div>
+          )}
           <div className="flex items-center space-x-2">
             <span className="text-2xl font-bold text-blue-700">
-              {formatPrice(discountedPrice)}
+              {formatPrice(finalPrice)}
             </span>
-            {discountPercent > 0 && (
-              <span className="text-lg text-slate-400 line-through">
-                {formatPrice(originalPrice)}
-              </span>
-            )}
           </div>
           <p className="text-xs text-slate-500 mt-1">Harga per unit</p>
+        </div>
+
+        <div className="my-3">
+          <QuantityControl value={quantity} onChange={onQuantityChange} min={0} />
         </div>
 
         {/* Free Delivery Badge */}
@@ -130,13 +142,34 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Action Buttons */}
       <div className="px-6 pb-6">
         <div className="flex space-x-2">
-          <button
-            onClick={onAddToCart}
-            className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
-          >
-            <ShoppingCart className="h-4 w-4 group-hover:animate-bounce" />
-            <span>Tambah</span>
-          </button>
+          {(() => {
+            const subtotal = finalPrice * quantity;
+            const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${productName}\nHarga Satuan: Rp${finalPrice.toLocaleString('id-ID')}\nJumlah: ${quantity}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
+            const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
+            if (quantity > 0) {
+              return (
+                <a
+                  href={waHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <ShoppingCart className="h-4 w-4 group-hover:animate-bounce" />
+                  <span>Beli</span>
+                </a>
+              );
+            }
+            return (
+              <button
+                className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 text-white px-4 py-3 rounded-lg font-semibold opacity-50 cursor-not-allowed flex items-center justify-center space-x-2"
+                disabled
+              >
+                <ShoppingCart className="h-4 w-4" />
+                <span>Beli</span>
+              </button>
+            );
+          })()}
           <button
             onClick={onViewDetails}
             className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"

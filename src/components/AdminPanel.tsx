@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings, 
   Package, 
@@ -16,6 +16,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import NestedProductTable from './NestedProductTable';
+import { supabase } from '../supabaseClient';
 
 interface Product {
   ukuran?: string;
@@ -47,32 +48,32 @@ const AdminPanel: React.FC = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
 
-  // Sample promotions data
-  const [promotions, setPromotions] = useState<Promotion[]>([
-    {
-      id: 1,
-      title: "Mega Sale Material Konstruksi",
-      description: "Diskon besar-besaran untuk semua material konstruksi",
-      discountPercent: 25,
-      startDate: "2024-01-01",
-      endDate: "2024-01-31",
-      isActive: true,
-      targetRegion: "Bandung",
-      gimmickType: "pulse"
-    },
-    {
-      id: 2,
-      title: "Promo Besi Tulangan",
-      description: "Khusus pembelian besi tulangan dalam jumlah besar",
-      discountPercent: 15,
-      startDate: "2024-01-15",
-      endDate: "2024-02-15",
-      isActive: true,
-      targetRegion: "Jabodetabek",
-      gimmickType: "glow"
-    }
-  ]);
+  // Fetch promotions from Supabase
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
+
+  const fetchPromotions = async () => {
+    const { data, error } = await supabase.from('promotions').select('*');
+    if (!error && data) setPromotions(data);
+  };
+
+  const addPromotion = async (promo: Promotion) => {
+    await supabase.from('promotions').insert([promo]);
+    fetchPromotions();
+  };
+
+  const updatePromotion = async (id: number, promo: Promotion) => {
+    await supabase.from('promotions').update(promo).eq('id', id);
+    fetchPromotions();
+  };
+
+  const deletePromotion = async (id: number) => {
+    await supabase.from('promotions').delete().eq('id', id);
+    fetchPromotions();
+  };
 
   const [productForm, setProductForm] = useState<Product>({
     ukuran: '',
@@ -132,17 +133,15 @@ const AdminPanel: React.FC = () => {
 
   const handleDeletePromotion = (id: number) => {
     if (confirm('Apakah Anda yakin ingin menghapus promosi ini?')) {
-      setPromotions(promotions.filter(p => p.id !== id));
+      deletePromotion(id);
     }
   };
 
   const handleSavePromotion = () => {
     if (editingPromotion) {
-      setPromotions(promotions.map(p => 
-        p.id === editingPromotion.id ? promotionForm : p
-      ));
+      updatePromotion(editingPromotion.id, promotionForm);
     } else {
-      setPromotions([...promotions, { ...promotionForm, id: Date.now() }]);
+      addPromotion({ ...promotionForm, id: Date.now() });
     }
     setShowPromotionModal(false);
     setEditingPromotion(null);
@@ -161,6 +160,10 @@ const AdminPanel: React.FC = () => {
     { id: 'promotions', label: 'Kelola Promosi', icon: Tag },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 }
   ];
+
+  // State dummy untuk admin mode
+  const dummyQuantities = {};
+  const dummyOnQuantityChange = () => {};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-100">
@@ -236,6 +239,8 @@ const AdminPanel: React.FC = () => {
               onDeleteProduct={handleDeleteProduct}
               onAddProduct={handleAddProduct}
               isAdminMode={true}
+              quantities={dummyQuantities}
+              onQuantityChange={dummyOnQuantityChange}
             />
           </div>
         )}
