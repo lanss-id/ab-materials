@@ -1,26 +1,24 @@
-import React, { useState } from 'react';
-import { ShoppingCart, Info, Star, Truck } from 'lucide-react';
+import React from 'react';
+import { ShoppingCart, Info, Star, Truck, Tag, Layers } from 'lucide-react';
 import QuantityControl from './QuantityControl';
+import { roundToNearestHundred } from '../utils/priceUtils';
 
+// Definisi tipe yang konsisten dengan data yang diterima
 interface Product {
-  ukuran?: string;
-  jenis?: string;
-  diameter_mm?: number;
-  harga: number;
-  aplikasi?: string;
-  dimensi?: string;
-  warna?: string;
-  grade?: string;
+  id: number;
+  name: string;
+  price: number;
+  image_url?: string;
+  metadata?: any;
 }
 
 interface ProductCardProps {
   product: Product;
   categoryName: string;
+  subCategoryName?: string;
+  brandName?: string;
   isPromoted?: boolean;
-  discountPercent?: number;
-  hargaDiskon?: number;
-  onAddToCart?: () => void;
-  onViewDetails?: () => void;
+  getDiscountForProduct: (productId: number) => number;
   quantity: number;
   onQuantityChange: (value: number) => void;
 }
@@ -28,11 +26,10 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   categoryName,
+  subCategoryName,
+  brandName,
   isPromoted = false,
-  discountPercent = 0,
-  hargaDiskon,
-  onAddToCart,
-  onViewDetails,
+  getDiscountForProduct,
   quantity,
   onQuantityChange
 }) => {
@@ -44,108 +41,77 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }).format(price);
   };
 
-  const originalPrice = product.harga;
-  const finalPrice = discountPercent > 0 && hargaDiskon ? hargaDiskon : originalPrice;
-
-  const productName = product.ukuran || product.jenis || 'Produk';
+  const discountPercent = getDiscountForProduct(product.id);
+  const originalPrice = product.price;
+  const finalPrice = discountPercent > 0 ? originalPrice * (1 - discountPercent / 100) : originalPrice;
+  const productName = product.name;
 
   return (
-    <div className={`group relative bg-white rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden ${
+    <div className={`group relative bg-white rounded-2xl shadow-lg border transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 overflow-hidden flex flex-col h-full ${
       isPromoted ? 'border-orange-200 ring-2 ring-orange-100' : 'border-slate-200 hover:border-blue-200'
     }`}>
-      {/* Promotional Badge */}
-      {isPromoted && discountPercent > 0 && (
-        <div className="absolute top-4 left-4 z-10">
-          <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg animate-pulse">
-            -{discountPercent}%
-          </div>
+      
+      {/* Badges */}
+      <div className="p-6 pb-2">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="text-xs font-bold inline-block py-1 px-2 uppercase rounded-full text-blue-800 bg-blue-100">
+            {categoryName}
+          </span>
+          {subCategoryName && (
+            <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-teal-800 bg-teal-100">
+              {subCategoryName}
+            </span>
+          )}
+          {brandName && (
+            <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-slate-700 bg-slate-200">
+              {brandName}
+            </span>
+          )}
         </div>
-      )}
+      </div>
+      
+      <div className="p-6 pt-0 flex-grow">
+        <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors duration-200 mb-3">
+          {productName}
+        </h3>
 
-      {/* Special Offer Badge */}
-      {isPromoted && (
-        <div className="absolute top-4 right-4 z-10">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-2 rounded-full shadow-lg">
-            <Star className="h-4 w-4" />
-          </div>
-        </div>
-      )}
-
-      {/* Product Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="text-lg font-bold text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
-              {productName}
-            </h3>
-            <p className="text-sm text-slate-500 font-medium">{categoryName}</p>
-          </div>
-        </div>
-
-        {/* Product Details */}
-        <div className="space-y-2 mb-4">
-          {product.diameter_mm && (
-            <div className="flex items-center text-sm text-slate-600">
-              <span className="font-medium">Diameter:</span>
-              <span className="ml-2">{product.diameter_mm}mm</span>
+        {/* Product Details from Metadata */}
+        <div className="space-y-1 mb-4 text-sm text-slate-600 border-t border-b border-slate-100 py-3">
+          {Object.entries(product.metadata).map(([key, value]) => (
+            <div key={key} className="flex justify-between items-center">
+              <span className="font-medium capitalize text-slate-500">{key.replace(/_/g, ' ')}</span>
+              <span className="text-right font-semibold text-slate-700">{String(value)}</span>
             </div>
-          )}
-          {product.dimensi && (
-            <div className="flex items-center text-sm text-slate-600">
-              <span className="font-medium">Dimensi:</span>
-              <span className="ml-2">{product.dimensi}</span>
-            </div>
-          )}
-          {product.warna && (
-            <div className="flex items-center text-sm text-slate-600">
-              <span className="font-medium">Warna:</span>
-              <span className="ml-2">{product.warna}</span>
-            </div>
-          )}
-          {product.aplikasi && (
-            <div className="text-sm text-slate-600">
-              <span className="font-medium">Aplikasi:</span>
-              <p className="mt-1 text-xs leading-relaxed">{product.aplikasi}</p>
-            </div>
-          )}
+          ))}
         </div>
 
         {/* Pricing */}
         <div className="mb-4">
-          {discountPercent > 0 && (
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-lg text-slate-400 line-through">{formatPrice(originalPrice)}</span>
-              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">-{discountPercent}%</span>
-            </div>
+          {discountPercent > 0 ? (
+            <>
+              <p className="text-sm text-slate-400 line-through mb-1">{formatPrice(originalPrice)}</p>
+              <p className="text-2xl font-bold text-orange-600">{formatPrice(finalPrice)}</p>
+            </>
+          ) : (
+            <p className="text-2xl font-bold text-slate-800">{formatPrice(originalPrice)}</p>
           )}
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-blue-700">
-              {formatPrice(finalPrice)}
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1">Harga per unit</p>
         </div>
 
         <div className="my-3">
           <QuantityControl value={quantity} onChange={onQuantityChange} min={0} />
         </div>
-
-        {/* Free Delivery Badge */}
-        {isPromoted && (
-          <div className="flex items-center space-x-2 bg-green-50 text-green-700 px-3 py-2 rounded-lg mb-4">
-            <Truck className="h-4 w-4" />
-            <span className="text-sm font-medium">Gratis Ongkir Jabodetabek</span>
-          </div>
-        )}
       </div>
 
       {/* Action Buttons */}
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6 bg-slate-50 pt-4 border-t">
         <div className="flex space-x-2">
           {(() => {
-            const subtotal = finalPrice * quantity;
-            const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${productName}\nHarga Satuan: Rp${finalPrice.toLocaleString('id-ID')}\nJumlah: ${quantity}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
+            const roundedFinalPrice = roundToNearestHundred(finalPrice);
+            const subtotal = roundedFinalPrice * quantity;
+            const path = `${categoryName}${subCategoryName ? ` > ${subCategoryName}` : ''}${brandName ? ` > ${brandName}` : ''}`;
+            const pesan = `Halo Admin, saya ingin memesan:\n\n*Produk:* ${productName}\n*Kategori:* ${path}\n*Harga Satuan:* Rp${roundedFinalPrice.toLocaleString('id-ID')}\n*Jumlah:* ${quantity}\n*Subtotal:* Rp${subtotal.toLocaleString('id-ID')}\n\nTerima kasih.`;
             const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
+            
             if (quantity > 0) {
               return (
                 <a
@@ -171,8 +137,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             );
           })()}
           <button
-            onClick={onViewDetails}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
           >
             <Info className="h-4 w-4" />
           </button>

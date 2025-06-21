@@ -8,78 +8,76 @@ import {
   ShoppingCart,
   Tag,
   Package,
-  DollarSign
+  DollarSign,
+  Layers,
+  Info,
+  BarChart
 } from 'lucide-react';
-import constructionData from '../data/construction_products_json.json';
 import QuantityControl from './QuantityControl';
+import { roundToNearestHundred, formatPriceWithRounding } from '../utils/priceUtils';
 
 interface Product {
-  ukuran?: string;
-  jenis?: string;
-  diameter_mm?: number;
-  harga: number;
-  aplikasi?: string;
-  dimensi?: string;
-  warna?: string;
-  grade?: string;
-  kemasan?: string;
-  panjang?: string;
+  id: number;
+  name: string;
+  price: number;
+  image_url?: string;
+  metadata: any;
+}
+
+interface Brand {
+  id: number;
+  name: string;
+  products: Product[];
+}
+
+interface SubCategory {
+  id: number;
+  name: string;
+  brands: Brand[];
 }
 
 interface Category {
   id: number;
-  nama: string;
-  deskripsi: string;
-  produk?: Product[];
-  sub_kategori?: {
-    merk: string;
-    produk: Product[];
-  }[];
+  name: string;
+  description: string;
+  sub_categories: SubCategory[];
+  brands: Brand[];
 }
 
 interface NestedProductTableProps {
-  onEditProduct?: (categoryId: number, product: Product, index: number) => void;
-  onDeleteProduct?: (categoryId: number, index: number) => void;
+  categories: Category[];
+  onEditProduct?: (product: Product) => void;
+  onDeleteProduct?: (productId: number) => void;
   onAddProduct?: (categoryId: number) => void;
+  onAddSubCategoryProduct?: (categoryName: string, subCategoryName: string) => void;
+  onDeleteCategory?: (categoryName: string) => void;
+  onDeleteSubCategory?: (categoryName: string, subCategoryName: string) => void;
   isAdminMode?: boolean;
   quantities: { [key: string]: number };
   onQuantityChange: (key: string, value: number) => void;
-  discountPercent?: number;
+  getDiscountForProduct: (productId: number) => number;
 }
 
 const NestedProductTable: React.FC<NestedProductTableProps> = ({
+  categories,
   onEditProduct,
   onDeleteProduct,
   onAddProduct,
+  onAddSubCategoryProduct,
+  onDeleteCategory,
+  onDeleteSubCategory,
   isAdminMode = false,
   quantities,
   onQuantityChange,
-  discountPercent = 0
+  getDiscountForProduct,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedSubCategories, setExpandedSubCategories] = useState<Set<string>>(new Set());
+  const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
 
-  const categories: Category[] = constructionData.daftar_produk_konstruksi.kategori;
-
-  const toggleCategory = (categoryId: number) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(categoryId)) {
-      newExpanded.delete(categoryId);
-    } else {
-      newExpanded.add(categoryId);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const toggleSubCategory = (key: string) => {
-    const newExpanded = new Set(expandedSubCategories);
-    if (newExpanded.has(key)) {
-      newExpanded.delete(key);
-    } else {
-      newExpanded.add(key);
-    }
-    setExpandedSubCategories(newExpanded);
-  };
+  const toggleCategory = (id: number) => setExpandedCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  const toggleSubCategory = (id: string) => setExpandedSubCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  const toggleBrand = (id: string) => setExpandedBrands(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -90,333 +88,326 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
   };
 
   const getProductName = (product: Product) => {
-    return product.ukuran || product.jenis || 'Produk';
+    return product.name || 'Produk';
   };
 
   const getRowKey = (categoryId: number, index: number, subKey?: string) => `${categoryId}-${index}-${subKey || 'main'}`;
 
-  const renderProductRow = (
-    product: Product, 
-    categoryId: number, 
-    index: number, 
-    isSubProduct = false,
-    subCategoryKey?: string
-  ) => (
-    <tr 
-      key={getRowKey(categoryId, index, subCategoryKey)}
-      className={`${isSubProduct ? 'bg-slate-50' : 'bg-white'} hover:bg-blue-50 transition-colors duration-200`}
-    >
-      <td className={`px-6 py-4 ${isSubProduct ? 'pl-12' : ''}`}>
-        <div className="flex items-center space-x-3">
-          <div className={`w-2 h-2 rounded-full ${isSubProduct ? 'bg-slate-400' : 'bg-blue-500'}`}></div>
-          <div>
-            <div className="font-medium text-slate-900">{getProductName(product)}</div>
-            {product.aplikasi && (
-              <div className="text-sm text-slate-500 mt-1">{product.aplikasi}</div>
-            )}
-          </div>
-        </div>
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="space-y-1">
-          {product.diameter_mm && (
-            <div className="text-sm text-slate-600">⌀ {product.diameter_mm}mm</div>
-          )}
-          {product.dimensi && (
-            <div className="text-sm text-slate-600">{product.dimensi}</div>
-          )}
-          {product.warna && (
-            <div className="text-sm text-slate-600">Warna: {product.warna}</div>
-          )}
-          {product.grade && (
-            <div className="text-sm text-slate-600">Grade: {product.grade}</div>
-          )}
-          {product.kemasan && (
-            <div className="text-sm text-slate-600">Kemasan: {product.kemasan}</div>
-          )}
-        </div>
-      </td>
-      
-      <td className="px-6 py-4">
-        {discountPercent > 0 ? (
-          <>
-            <div className="flex items-center space-x-2 mb-1">
-              <span className="text-lg text-slate-400 line-through">{formatPrice(product.harga)}</span>
-              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-bold">-{discountPercent}%</span>
-            </div>
-            <div className="text-lg font-bold text-blue-700">
-              {formatPrice(product.harga * (1 - discountPercent / 100))}
-            </div>
-          </>
-        ) : (
-          <div className="text-lg font-bold text-blue-700">
-            {formatPrice(product.harga)}
-          </div>
-        )}
-        <div className="text-xs text-slate-500">per unit</div>
-      </td>
-      
-      <td className="px-6 py-4">
-        <QuantityControl
-          value={quantities[getRowKey(categoryId, index, subCategoryKey)] || 0}
-          onChange={(val) => onQuantityChange(getRowKey(categoryId, index, subCategoryKey), val)}
-          min={0}
-        />
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="flex items-center space-x-2">
-          {isAdminMode ? (
-            <>
-              <button
-                onClick={() => onEditProduct?.(categoryId, product, index)}
-                className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200"
-                title="Edit Produk"
-              >
-                <Edit className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => onDeleteProduct?.(categoryId, index)}
-                className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200"
-                title="Hapus Produk"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </>
-          ) : (
-            <>
-              {(() => {
-                const qty = quantities[getRowKey(categoryId, index, subCategoryKey)] || 0;
-                const namaProduk = getProductName(product);
-                const hargaSatuan = discountPercent > 0 ? product.harga * (1 - discountPercent / 100) : product.harga;
-                const subtotal = hargaSatuan * qty;
-                const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${namaProduk}\nHarga Satuan: Rp${hargaSatuan.toLocaleString('id-ID')}\nJumlah: ${qty}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
-                const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
-                if (qty > 0) {
-                  return (
-                    <a
-                      href={waHref}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <ShoppingCart className="h-4 w-4" />
-                      <span>Beli</span>
-                    </a>
-                  );
-                }
-                return (
-                  <button
-                    className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed flex items-center space-x-2"
-                    disabled
-                  >
-                    <ShoppingCart className="h-4 w-4" />
-                    <span>Beli</span>
-                  </button>
-                );
-              })()}
-              <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                Detail
-              </button>
-            </>
-          )}
-        </div>
-      </td>
-    </tr>
-  );
-
-  const renderCategoryHeader = (category: Category) => {
-    const isExpanded = expandedCategories.has(category.id);
-    const productCount = (category.produk?.length || 0) + 
-      (category.sub_kategori?.reduce((acc, sub) => acc + (sub.produk?.length || 0), 0) || 0);
+  const renderProductRow = (product: Product, level: number) => {
+    const rowKey = `product-${product.id}`;
+    const discountPercent = getDiscountForProduct(product.id);
+    const finalPrice = discountPercent > 0 ? product.price * (1 - discountPercent / 100) : product.price;
 
     return (
       <tr 
-        key={`category-${category.id}`}
-        className="bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 cursor-pointer transition-all duration-200"
-        onClick={() => toggleCategory(category.id)}
+        key={rowKey}
+        className={`${'bg-slate-50'} hover:bg-blue-50 transition-colors duration-200`}
       >
-        <td colSpan={5} className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-slate-600" />
-                ) : (
-                  <ChevronRight className="h-5 w-5 text-slate-600" />
-                )}
-                <Package className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">{category.nama}</h3>
-                <p
-                  className={`text-sm text-slate-600 mt-1 ${!isExpanded ? 'line-clamp-1' : ''}`}
-                >
-                  {category.deskripsi}
-                </p>
-              </div>
-            </div>
-            <div
-              className="flex items-center space-x-4 w-full"
-              style={{
-                minWidth: 0,
-                justifyContent: 'flex-end',
-                flexWrap: 'nowrap',
-                gap: '1rem',
-              }}
-            >
-              {(() => {
-                // Ambil semua produk dari kategori dan sub_kategori
-                const allProducts = [
-                  ...(category.produk || []),
-                  ...((category.sub_kategori || []).flatMap(sub => sub.produk || []))
-                ];
-                if (allProducts.length === 0) {
-                  return (
-                    <div
-                      className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
-                      style={{
-                        minWidth: 120,
-                        maxWidth: 160,
-                        width: 120,
-                        height: 32,
-                        borderRadius: 8,
-                        padding: '0 12px',
-                        whiteSpace: 'nowrap',
-                        textAlign: 'right',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      Tidak ada produk
-                    </div>
-                  );
-                }
-                // Ambil semua harga produk
-                const prices = allProducts
-                  .map((p: any) => p.harga)
-                  .filter((h: any) => typeof h === 'number');
-                if (prices.length === 0) {
-                  return (
-                    <div
-                      className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
-                      style={{
-                        minWidth: 120,
-                        maxWidth: 160,
-                        width: 120,
-                        height: 32,
-                        borderRadius: 8,
-                        padding: '0 12px',
-                        whiteSpace: 'nowrap',
-                        textAlign: 'right',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      Tidak ada harga
-                    </div>
-                  );
-                }
-                const minPrice = Math.min(...prices);
-                const maxPrice = Math.max(...prices);
-                // Format harga menjadi singkat, misal 22000 => 22k
-                const formatShort = (value: number) => {
-                  if (value >= 1_000_000) {
-                    return (value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1) + 'jt';
-                  }
-                  if (value >= 1_000) {
-                    return (value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1) + 'k';
-                  }
-                  return value.toString();
-                };
-                return (
-                  <div
-                    className="bg-[#C6D4FF] text-sm font-medium flex items-center justify-end"
-                    style={{
-                      minWidth: 120,
-                      maxWidth: 160,
-                      width: 120,
-                      height: 32,
-                      borderRadius: 8,
-                      padding: '0 12px',
-                      whiteSpace: 'nowrap',
-                      textAlign: 'right',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {minPrice === maxPrice
-                      ? ` ${formatShort(minPrice)}`
-                      : ` ${formatShort(minPrice)} - ${formatShort(maxPrice)}`}
-                  </div>
-                );
-              })()}
-              {isAdminMode && (
+        <td style={{ paddingLeft: `${1.5 + level * 2}rem` }} className="px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0"></div>
+            <div className="font-medium text-slate-900">{getProductName(product)}</div>
+          </div>
+        </td>
+        
+        <td className="px-6 py-4">
+          <div className="space-y-1 text-sm text-slate-600 max-w-xs">
+            {Object.entries(product.metadata).map(([key, value]) => {
+              // Jika nilai terlalu panjang, kita bisa handle secara berbeda jika perlu
+              const isLongValue = String(value).length > 30;
+              return (
+                <div key={key} className="flex items-start text-xs">
+                  <div className="w-1/3 font-medium capitalize text-slate-500 shrink-0">{key.replace(/_/g, ' ')}:</div>
+                  <div className="w-2/3 font-semibold text-slate-700">{String(value)}</div>
+                </div>
+              );
+            })}
+          </div>
+        </td>
+        
+        <td className="px-6 py-4">
+          {discountPercent > 0 ? (
+            <>
+              <div className="text-sm text-slate-400 line-through">{formatPrice(product.price)}</div>
+              <div className="text-lg font-bold text-blue-700">{formatPrice(finalPrice)}</div>
+            </>
+          ) : (
+            <div className="text-lg font-bold text-blue-700">{formatPrice(product.price)}</div>
+          )}
+          <div className="text-xs text-slate-500">per unit</div>
+        </td>
+        
+        <td className="px-6 py-4">
+          <QuantityControl
+            value={quantities[rowKey] || 0}
+            onChange={(val) => onQuantityChange(rowKey, val)}
+            min={0}
+          />
+        </td>
+        
+        <td className="px-6 py-4">
+          <div className="flex items-center space-x-2">
+            {isAdminMode ? (
+              <>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddProduct?.(category.id);
-                  }}
-                  className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
-                  title="Tambah Produk"
-                  style={{
-                    minWidth: 36,
-                    minHeight: 36,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
+                  onClick={() => onEditProduct?.(product)}
+                  className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                  title="Edit Produk"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Edit className="h-4 w-4" />
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={() => onDeleteProduct?.(product.id)}
+                  className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200"
+                  title="Hapus Produk"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                {(() => {
+                  const qty = quantities[rowKey] || 0;
+                  const namaProduk = getProductName(product);
+                  
+                  const discountPercent = getDiscountForProduct(product.id);
+                  const hargaSatuan = discountPercent > 0 ? 
+                    roundToNearestHundred(product.price * (1 - discountPercent / 100)) : 
+                    roundToNearestHundred(product.price);
+                  const subtotal = hargaSatuan * qty;
+                  const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${namaProduk}\nHarga Satuan: Rp${hargaSatuan.toLocaleString('id-ID')}\nJumlah: ${qty}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
+                  const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
+                  if (qty > 0) {
+                    return (
+                      <a
+                        href={waHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>Beli</span>
+                      </a>
+                    );
+                  }
+                  return (
+                    <button
+                      className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed flex items-center space-x-2"
+                      disabled
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      <span>Beli</span>
+                    </button>
+                  );
+                })()}
+                <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                  Detail
+                </button>
+              </>
+            )}
           </div>
         </td>
       </tr>
     );
   };
 
-  const renderSubCategoryHeader = (subCategory: any, categoryId: number) => {
-    const subKey = `${categoryId}-${subCategory.merk}`;
-    const isExpanded = expandedSubCategories.has(subKey);
+  const renderBrandHeader = (brand: Brand, parentKey: string, level: number) => {
+    const brandKey = `${parentKey}-${brand.id}`;
+    const isExpanded = expandedBrands.has(brandKey);
+    return (
+      <React.Fragment key={brandKey}>
+        <tr className="bg-slate-50 border-t border-b border-slate-200 hover:bg-slate-100 cursor-pointer" onClick={() => toggleBrand(brandKey)}>
+          <td colSpan={5} style={{ paddingLeft: `${1.5 + level * 2}rem` }} className="px-6 py-3">
+            <div className="flex items-center space-x-3">
+              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              <Layers className="h-4 w-4 text-slate-600" />
+              <span className="font-medium text-slate-600">{brand.name}</span>
+              <span className="text-xs text-slate-500">({brand.products.length} produk)</span>
+            </div>
+          </td>
+        </tr>
+        {isExpanded && brand.products.map(p => renderProductRow(p, level + 1))}
+      </React.Fragment>
+    );
+  };
+
+  const renderSubCategoryHeader = (subCategory: SubCategory, parentKey: string, level: number) => {
+    const subCategoryKey = `${parentKey}-${subCategory.id}`;
+    const isExpanded = expandedSubCategories.has(subCategoryKey);
+    return (
+      <React.Fragment key={subCategoryKey}>
+        <tr className="bg-slate-100 border-t border-b border-slate-200 hover:bg-slate-200 cursor-pointer" onClick={() => toggleSubCategory(subCategoryKey)}>
+          <td colSpan={5} style={{ paddingLeft: `${1.5 + level * 2}rem` }} className="px-6 py-3">
+            <div className="flex items-center space-x-3">
+              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              <Tag className="h-4 w-4 text-slate-700" />
+              <span className="font-semibold text-slate-700">{subCategory.name}</span>
+            </div>
+          </td>
+        </tr>
+        {isExpanded && subCategory.brands.map(b => renderBrandHeader(b, subCategoryKey, level + 1))}
+      </React.Fragment>
+    );
+  };
+  
+  const renderCategoryHeader = (category: Category) => {
+    const isExpanded = expandedCategories.has(category.id);
+    
+    // Memperbaiki logika untuk menghitung semua produk dalam kategori
+    const allProductsInCategory = [
+      ...(category.brands?.flatMap(b => b.products) || []),
+      ...(category.sub_categories?.flatMap(sc => sc.brands?.flatMap(b => b.products) || []) || [])
+    ].filter(Boolean);
+    const productCount = allProductsInCategory.length;
 
     return (
-      <tr 
-        key={`subcategory-${subKey}`}
-        className="bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors duration-200"
-        onClick={() => toggleSubCategory(subKey)}
-      >
-        <td colSpan={5} className="px-6 py-3 pl-12">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                {isExpanded ? (
-                  <ChevronDown className="h-4 w-4 text-slate-500" />
-                ) : (
-                  <ChevronRight className="h-4 w-4 text-slate-500" />
+      <React.Fragment key={category.id}>
+        <tr className="bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 cursor-pointer" onClick={() => toggleCategory(category.id)}>
+          <td colSpan={5} className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                <Package className="h-5 w-5 text-blue-600" />
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">{category.name}</h3>
+                  <p className="text-sm text-slate-600 mt-1">{category.description}</p>
+                </div>
+              </div>
+              <div
+                className="flex items-center space-x-4 w-full"
+                style={{
+                  minWidth: 0,
+                  justifyContent: 'flex-end',
+                  flexWrap: 'nowrap',
+                  gap: '1rem',
+                }}
+              >
+                {(() => {
+                  if (productCount === 0) {
+                    return (
+                      <div
+                        className="bg-slate-200 text-slate-600 text-sm font-medium flex items-center justify-center"
+                        style={{
+                          minWidth: 120,
+                          width: 120,
+                          height: 32,
+                          borderRadius: 8,
+                          padding: '0 12px',
+                        }}
+                      >
+                        Tidak ada produk
+                      </div>
+                    );
+                  }
+                  
+                  const prices = allProductsInCategory
+                    .map((p: Product) => p.price)
+                    .filter((h: number) => typeof h === 'number');
+
+                  if (prices.length === 0) {
+                    return (
+                       <div
+                        className="bg-slate-200 text-slate-600 text-sm font-medium flex items-center justify-center"
+                        style={{
+                          minWidth: 120,
+                          width: 120,
+                          height: 32,
+                          borderRadius: 8,
+                          padding: '0 12px',
+                        }}
+                      >
+                        Tidak ada harga
+                      </div>
+                    );
+                  }
+                  
+                  const minPrice = Math.min(...prices);
+                  const maxPrice = Math.max(...prices);
+                  
+                  const formatShort = (value: number) => {
+                    if (value >= 1_000_000) {
+                      return (value / 1_000_000).toFixed(value % 1_000_000 === 0 ? 0 : 1) + 'jt';
+                    }
+                    if (value >= 1_000) {
+                      return (value / 1_000).toFixed(value % 1_000 === 0 ? 0 : 1) + 'k';
+                    }
+                    return value.toString();
+                  };
+                  return (
+                    <div
+                      className="bg-blue-100 text-blue-800 text-sm font-semibold flex items-center justify-center"
+                      style={{
+                        minWidth: 120,
+                        maxWidth: 160,
+                        height: 32,
+                        borderRadius: 8,
+                        padding: '0 12px',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {minPrice === maxPrice
+                        ? `Rp ${formatShort(minPrice)}`
+                        : `Rp ${formatShort(minPrice)} - ${formatShort(maxPrice)}`}
+                    </div>
+                  );
+                })()}
+                {isAdminMode && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddProduct?.(category.id);
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
+                      title="Tambah Produk"
+                      style={{
+                        minWidth: 36,
+                        minHeight: 36,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteCategory?.(category.name);
+                      }}
+                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
+                      title="Hapus Kategori"
+                      style={{
+                        minWidth: 36,
+                        minHeight: 36,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
                 )}
-                <Tag className="h-4 w-4 text-orange-600" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-slate-700">Merk: {subCategory.merk}</h4>
               </div>
             </div>
-            <div className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-              {subCategory.produk?.length || 0} varian
-            </div>
-          </div>
-        </td>
-      </tr>
+          </td>
+        </tr>
+        {isExpanded && (
+          <>
+            {category.sub_categories.map(sc => renderSubCategoryHeader(sc, `cat-${category.id}`, 1))}
+            {category.brands.map(b => renderBrandHeader(b, `cat-${category.id}`, 1))}
+          </>
+        )}
+      </React.Fragment>
     );
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-      {/* Table Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
+      {/* Table Title Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white flex items-center space-x-2">
             <Package className="h-6 w-6" />
@@ -430,79 +421,38 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-100 border-b border-slate-200">
+      {/* Scrollable Table Panel */}
+      <div className="overflow-auto max-h-[70vh]">
+        <table className="w-full min-w-[800px]" style={{ borderSpacing: 0, borderCollapse: 'separate' }}>
+          <thead className="sticky top-0 z-10">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                Produk & Deskripsi
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                Spesifikasi
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                <div className="flex items-center space-x-1">
-                  <span>Harga</span>
-                </div>
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                Kuantitas
-              </th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
-                Aksi
-              </th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/3 bg-slate-100 border-b border-slate-300">Produk</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/4 bg-slate-100 border-b border-slate-300">Spesifikasi</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Harga</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Kuantitas</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {categories.map((category) => {
-              const isExpanded = expandedCategories.has(category.id);
-              
-              return (
-                <React.Fragment key={category.id}>
-                  {renderCategoryHeader(category)}
-                  
-                  {isExpanded && (
-                    <>
-                      {/* Direct products */}
-                      {category.produk?.map((product, index) => 
-                        renderProductRow(product, category.id, index)
-                      )}
-                      
-                      {/* Sub-categories */}
-                      {category.sub_kategori?.map((subCategory) => {
-                        const subKey = `${category.id}-${subCategory.merk}`;
-                        const isSubExpanded = expandedSubCategories.has(subKey);
-                        
-                        return (
-                          <React.Fragment key={subKey}>
-                            {renderSubCategoryHeader(subCategory, category.id)}
-                            
-                            {isSubExpanded && subCategory.produk?.map((product, index) => 
-                              renderProductRow(product, category.id, index, true, subKey)
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </>
-                  )}
-                </React.Fragment>
-              );
-            })}
+            {categories.map(category => renderCategoryHeader(category))}
           </tbody>
         </table>
       </div>
 
       {/* Footer */}
-      <div className="bg-slate-50 px-6 py-4 border-t border-slate-200">
+      <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex-shrink-0">
         <div className="flex items-center justify-between text-sm text-slate-600">
-          <div>
-            Total: {categories.length} kategori dengan{' '}
-            {categories.reduce((acc, cat) => 
-              acc + (cat.produk?.length || 0) + 
-              (cat.sub_kategori?.reduce((subAcc, sub) => subAcc + (sub.produk?.length || 0), 0) || 0)
-            , 0)} produk
-          </div>
+          {categories && (
+            <div>
+              Total: {categories.length} kategori dengan{' '}
+              {categories.reduce((acc, cat) => 
+                acc + [
+                  ...(cat.brands?.flatMap(b => b.products) || []),
+                  ...(cat.sub_categories?.flatMap(sc => sc.brands?.flatMap(b => b.products) || []) || [])
+                ].length
+              , 0)} produk
+            </div>
+          )}
           <div className="text-xs">
             Klik pada kategori untuk melihat detail produk
           </div>
