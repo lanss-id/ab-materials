@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { supabase } from './supabaseClient';
-import NestedProductTable from './components/NestedProductTable';
-import ProductShowcase from './components/ProductShowcase';
 import { Toaster } from 'sonner';
 import { 
   List, LayoutGrid, Loader2, ServerCrash, ShoppingCart, 
@@ -13,17 +11,23 @@ import PromotionalBanner from './components/PromotionalBanner';
 import TieredDiscountBanner from './components/TieredDiscountBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// Lazy load komponen
+// Lazy load komponen HALAMAN, bukan skeleton
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const KelolaProdukPage = lazy(() => import('./components/admin/KelolaProdukPage'));
 const AnalyticsPage = lazy(() => import('./components/admin/AnalyticsPage'));
 const KelolaPromosiPage = lazy(() => import('./components/admin/KelolaPromosiPage'));
 const KelolaDiskonBertingkatPage = lazy(() => import('./components/admin/KelolaDiskonBertingkatPage'));
-const AdminRoute = lazy(() => import('./components/AdminRoute'));
 const SignIn = lazy(() => import('./components/SignIn'));
 const SignUp = lazy(() => import('./components/SignUp'));
+const AdminRoute = lazy(() => import('./components/AdminRoute'));
 const GuestRoute = lazy(() => import('./components/GuestRoute'));
+// Kode yang benar
+const NestedProductTable = lazy(() => import('./components/NestedProductTable'));
+const ProductShowcase = lazy(() => import('./components/ProductShowcase'));
 
+// Impor skeleton secara langsung untuk mencegah CLS
+import TableSkeleton from './components/skeletons/TableSkeleton';
+import ShowcaseSkeleton from './components/skeletons/ShowcaseSkeleton';
 // Definisi tipe data
 interface Product {
   id: number;
@@ -261,14 +265,9 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
           </div>
         </section>
       
-        <section id="katalog" className="py-16 bg-gradient-to-b from-orange-50 to-slate-100">
+        <section id="katalog" className="py-12 bg-slate-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-slate-800 mb-4">Katalog Material Konstruksi</h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">Jelajahi koleksi lengkap material konstruksi kami.</p>
-            </div>
-            
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col md:flex-row justify-between md:items-center mb-8">
               {/* --- Kontrol Sorting Modern --- */}
               <div className="relative">
                 <div className="flex items-center space-x-3">
@@ -344,22 +343,31 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
               </div>
             </div>
             
-            {loading ? (
-              <div className="flex justify-center py-20">
-                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
-              </div>
-            ) : error ? (
-              <div className="text-center py-20 bg-red-50 border border-red-200 rounded-lg">
+            {loading && <LoadingFallback />}
+            {error && (
+              <div className="text-center py-12">
                 <ServerCrash className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-red-700">Oops! Terjadi Kesalahan</h3>
-                <p className="text-red-600 mt-2">{error}</p>
+                <p className="text-red-500 font-semibold">{error}</p>
               </div>
-            ) : (
-              viewMode === 'table' ? (
-                <NestedProductTable categories={sortedCategories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
-              ) : (
-                <ProductShowcase categories={sortedCategories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
-              )
+            )}
+            {!loading && !error && (
+              <Suspense fallback={viewMode === 'table' ? <TableSkeleton /> : <ShowcaseSkeleton />}>
+                {viewMode === 'table' ? (
+                  <NestedProductTable 
+                    categories={sortedCategories}
+                    quantities={quantities}
+                    onQuantityChange={handleQuantityChange}
+                    getDiscountForProduct={getDiscountForProduct}
+                  />
+                ) : (
+                  <ProductShowcase 
+                    categories={sortedCategories}
+                    quantities={quantities}
+                    onQuantityChange={handleQuantityChange}
+                    getDiscountForProduct={getDiscountForProduct}
+                  />
+                )}
+              </Suspense>
             )}
           </div>
         </section>
