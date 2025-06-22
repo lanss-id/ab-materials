@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Gift, Truck, Percent } from 'lucide-react';
+import { Gift, Truck } from 'lucide-react';
 
 interface TieredDiscount {
   id: number;

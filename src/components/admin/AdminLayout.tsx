@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
-import { Settings, Package, Tag, BarChart3, Gift, LogOut } from 'lucide-react';
+import { Package, Tag, BarChart3, Gift, LogOut } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {

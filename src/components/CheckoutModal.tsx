@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, ShoppingCart, Truck, Clock, Shield, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Truck, Clock, Shield, AlertCircle, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Tipe data item di keranjang harus sinkron dengan App.tsx

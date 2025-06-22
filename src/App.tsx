@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { supabase } from './supabaseClient';
 import NestedProductTable from './components/NestedProductTable';
 import ProductShowcase from './components/ProductShowcase';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
 import { 
-  List, LayoutGrid, Loader2, ServerCrash, ShoppingCart, Building2, 
-  MapPin, Phone, Mail, CheckCircle, Truck, Shield, Clock, FileText
+  List, LayoutGrid, Loader2, ServerCrash, ShoppingCart, 
+  MapPin, Phone, Mail, FileText
 } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';

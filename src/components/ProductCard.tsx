@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart, Info, Star, Truck, Tag, Layers } from 'lucide-react';
+import { ShoppingCart, Info, Truck, Tag } from 'lucide-react';
 import QuantityControl from './QuantityControl';
 import { roundToNearestHundred } from '../utils/priceUtils';
 

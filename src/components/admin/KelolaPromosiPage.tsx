@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Tag, Plus, Save, X, Edit, Trash2, Loader2, ShoppingBag, Store } from 'lucide-react';
+import { Plus, Save, X, Edit, Trash2, Loader2 } from 'lucide-react';
 import Select from 'react-select';
 import { toast } from 'sonner';
 

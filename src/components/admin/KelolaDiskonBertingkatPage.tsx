@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Loader2, ToggleLeft, ToggleRight, AlertTriangle, Save, PlusCircle, Trash2, X, Edit } from 'lucide-react';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 
 // Tipe data sesuai skema tabel
 interface TieredDiscount {
@@ -207,7 +207,6 @@ const KelolaDiskonBertingkatPage: React.FC = () => {
 
   return (
     <div className="p-6 bg-slate-50 min-h-full">
-        <Toaster position="top-right" richColors />
         <h1 className="text-3xl font-bold text-slate-800 mb-6">Kelola Diskon Checkout</h1>
 
         {/* Saklar Utama */}
