@@ -410,7 +410,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white flex items-center space-x-2">
             <Package className="h-6 w-6" />
-            <span>Katalog Produk Material Konstruksi</span>
+            <span>Katalog Material Konstruksi</span>
           </h2>
           {isAdminMode && (
             <div className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
