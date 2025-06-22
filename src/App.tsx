@@ -78,6 +78,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
   const [isCheckoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'showcase'>('table');
   const [sortOption, setSortOption] = useState('default');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   
   const handleQuantityChange = (key: string, value: number) => {
     setQuantities(prev => ({ ...prev, [key]: value < 0 ? 0 : value }));
@@ -96,6 +97,16 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
 
     return 0;
   }
+
+  const sortOptions = [
+    { value: 'default', label: 'Rekomendasi' },
+    { value: 'price-asc', label: 'Harga: Terendah ke Tertinggi' },
+    { value: 'price-desc', label: 'Harga: Tertinggi ke Terendah' },
+    { value: 'name-asc', label: 'Nama: A-Z' },
+    { value: 'name-desc', label: 'Nama: Z-A' },
+  ];
+
+  const selectedSortOption = sortOptions.find(option => option.value === sortOption) || sortOptions[0];
 
   const getCartItems = () => {
     const items: (Product & { quantity: number; finalPrice: number; brandName: string; originalPrice: number; })[] = [];
@@ -257,21 +268,62 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
             </div>
             
             <div className="flex justify-between items-center mb-6">
-              {/* --- Kontrol Sorting --- */}
-              <div>
-                <label htmlFor="sort-options" className="text-sm font-medium text-slate-700 mr-2">Urutkan:</label>
-                <select 
-                  id="sort-options"
-                  value={sortOption} 
-                  onChange={(e) => setSortOption(e.target.value)}
-                  className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow"
-                >
-                  <option value="default">Rekomendasi</option>
-                  <option value="price-asc">Harga: Terendah ke Tertinggi</option>
-                  <option value="price-desc">Harga: Tertinggi ke Terendah</option>
-                  <option value="name-asc">Nama: A-Z</option>
-                  <option value="name-desc">Nama: Z-A</option>
-                </select>
+              {/* --- Kontrol Sorting Modern --- */}
+              <div className="relative">
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm font-medium text-slate-700">Urutkan:</span>
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                      className="flex items-center justify-between bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-all duration-200 hover:border-slate-400 cursor-pointer shadow-sm hover:shadow-md min-w-[200px]"
+                    >
+                      <span className="truncate">{selectedSortOption.label}</span>
+                      <svg 
+                        className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${isSortDropdownOpen ? 'rotate-180' : ''}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    
+                    {/* Dropdown Menu */}
+                    {isSortDropdownOpen && (
+                      <div className="absolute top-full left-0 mt-1 w-full bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                        {sortOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setSortOption(option.value);
+                              setIsSortDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center space-x-3 px-4 py-3 text-sm font-medium transition-colors duration-150 hover:bg-slate-50 ${
+                              option.value === sortOption 
+                                ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500' 
+                                : 'text-slate-700'
+                            }`}
+                          >
+                            <span className="truncate">{option.label}</span>
+                            {option.value === sortOption && (
+                              <svg className="w-4 h-4 ml-auto text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Backdrop untuk menutup dropdown */}
+                {isSortDropdownOpen && (
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setIsSortDropdownOpen(false)}
+                  />
+                )}
               </div>
 
               {/* --- Kontrol Tampilan --- */}
