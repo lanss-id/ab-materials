@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from './supabaseClient';
 import NestedProductTable from './components/NestedProductTable';
 import ProductShowcase from './components/ProductShowcase';
@@ -8,9 +8,9 @@ import {
   MapPin, Phone, Mail, CheckCircle, Truck, Shield, Clock, FileText
 } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
-import { roundToNearestHundred, calculateTotalWithRounding } from './utils/priceUtils';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PromotionalBanner from './components/PromotionalBanner';
+import TieredDiscountBanner from './components/TieredDiscountBanner';
 
 // Impor komponen Admin
 import AdminLayout from './components/admin/AdminLayout';
@@ -21,6 +21,7 @@ import KelolaDiskonBertingkatPage from './components/admin/KelolaDiskonBertingka
 import AdminRoute from './components/AdminRoute';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
+import GuestRoute from './components/GuestRoute';
 
 // Definisi tipe data yang konsisten untuk seluruh aplikasi
 interface Product {
@@ -63,10 +64,11 @@ interface Promotion {
   promoted_product_ids?: Set<number>;
 }
 
-function PublicFacingApp({ categories, loading, error, promotion, appSettings }: { categories: Category[], loading: boolean, error: string | null, promotion: Promotion | null, appSettings: any }) {
+function PublicFacingApp({ categories, loading, error, promotion, appSettings, tieredDiscounts }: { categories: Category[], loading: boolean, error: string | null, promotion: Promotion | null, appSettings: any, tieredDiscounts: any[] }) {
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isCheckoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'showcase'>('table');
+  const [sortOption, setSortOption] = useState('default');
   
   const handleQuantityChange = (key: string, value: number) => {
     setQuantities(prev => ({ ...prev, [key]: value < 0 ? 0 : value }));
@@ -111,6 +113,40 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings }:
     return Array.from(new Map(items.map(item => [item.id, item])).values());
   };
 
+  const sortedCategories = useMemo(() => {
+    const sortProducts = (products: Product[], option: string) => {
+      const sorted = [...products];
+      switch (option) {
+        case 'price-asc':
+          return sorted.sort((a, b) => a.price - b.price);
+        case 'price-desc':
+          return sorted.sort((a, b) => b.price - a.price);
+        case 'name-asc':
+          return sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        case 'name-desc':
+          return sorted.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+        case 'default':
+        default:
+          return sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      }
+    };
+
+    return categories.map(category => ({
+      ...category,
+      brands: category.brands.map(brand => ({
+        ...brand,
+        products: sortProducts(brand.products, sortOption)
+      })),
+      sub_categories: category.sub_categories.map(sc => ({
+        ...sc,
+        brands: sc.brands.map(brand => ({
+          ...brand,
+          products: sortProducts(brand.products, sortOption)
+        }))
+      }))
+    }));
+  }, [categories, sortOption]);
+
   const cartItems = getCartItems();
   const totalBelanjaBruto = cartItems.reduce((acc, item) => acc + item.finalPrice * item.quantity, 0);
   
@@ -134,6 +170,12 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings }:
           </div>
         </div>
       </header>
+      
+      {/* Tiered Discount Banner */}
+      <TieredDiscountBanner 
+        tieredDiscounts={tieredDiscounts}
+        isFeatureActive={appSettings?.tiered_discount_active?.enabled ?? false}
+      />
       
       <main className="w-full">
         {/* ===== BANNER PROMOSI (BARU & DINAMIS) ===== */}
@@ -192,7 +234,25 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings }:
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">Jelajahi koleksi lengkap material konstruksi kami.</p>
             </div>
             
-            <div className="flex justify-end items-center mb-6">
+            <div className="flex justify-between items-center mb-6">
+              {/* --- Kontrol Sorting --- */}
+              <div>
+                <label htmlFor="sort-options" className="text-sm font-medium text-slate-700 mr-2">Urutkan:</label>
+                <select 
+                  id="sort-options"
+                  value={sortOption} 
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none transition-shadow"
+                >
+                  <option value="default">Rekomendasi</option>
+                  <option value="price-asc">Harga: Terendah ke Tertinggi</option>
+                  <option value="price-desc">Harga: Tertinggi ke Terendah</option>
+                  <option value="name-asc">Nama: A-Z</option>
+                  <option value="name-desc">Nama: Z-A</option>
+                </select>
+              </div>
+
+              {/* --- Kontrol View Mode --- */}
                <div className="flex items-center bg-slate-200 rounded-lg p-1 border border-slate-300">
                 <button onClick={() => setViewMode('showcase')} className={`p-2 rounded-md ${viewMode === 'showcase' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}><LayoutGrid className="h-5 w-5" /></button>
                 <button onClick={() => setViewMode('table')} className={`p-2 rounded-md ${viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}><List className="h-5 w-5" /></button>
@@ -205,9 +265,9 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings }:
               <div className="text-center bg-red-100 p-6 rounded-lg"><ServerCrash className="w-12 h-12 mx-auto mb-4 text-red-500" /><h3 className="text-xl font-semibold">Gagal memuat data</h3><p>{error}</p></div>
             ) : (
               viewMode === 'table' ? (
-                <NestedProductTable categories={categories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
+                <NestedProductTable categories={sortedCategories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
               ) : (
-                <ProductShowcase categories={categories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
+                <ProductShowcase categories={sortedCategories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
               )
             )}
           </div>
@@ -290,6 +350,7 @@ function App() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [activePromotion, setActivePromotion] = useState<Promotion | null>(null);
   const [appSettings, setAppSettings] = useState<any>({});
+  const [tieredDiscounts, setTieredDiscounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -297,13 +358,25 @@ function App() {
     setLoading(true);
     setError(null);
 
-    const [productsResponse, promotionResponse, settingsResponse] = await Promise.all([
+    const [productsResponse, promotionResponse, settingsResponse, tieredDiscountsResponse] = await Promise.all([
       supabase
         .from('categories')
         .select(`
           id, name, description,
-          sub_categories (id, name, brands (id, name, products (id, name, price, image_url, metadata))),
-          brands (id, name, products (id, name, price, image_url, metadata))
+          sub_categories (
+            id, name, brands (
+              id, name, products (
+                id, name, price, image_url, metadata, unit_id,
+                units (name)
+              )
+            )
+          ),
+          brands (
+            id, name, products (
+              id, name, price, image_url, metadata, unit_id,
+              units (name)
+            )
+          )
         `),
       supabase
         .from('promotions')
@@ -332,14 +405,29 @@ function App() {
         const brandIdsInSubCategories = new Set(
           category.sub_categories.flatMap(sc => sc.brands.map(b => b.id))
         );
-        
         const directBrands = category.brands.filter(
           brand => !brandIdsInSubCategories.has(brand.id)
         );
-        
+        // Mapping unitName di brands dan sub_categories
         return {
           ...category,
-          brands: directBrands,
+          brands: directBrands.map(brand => ({
+            ...brand,
+            products: brand.products.map((p: any) => ({
+              ...p,
+              unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit'
+            }))
+          })),
+          sub_categories: category.sub_categories.map((sc: any) => ({
+            ...sc,
+            brands: sc.brands.map((brand: any) => ({
+              ...brand,
+              products: brand.products.map((p: any) => ({
+                ...p,
+                unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit'
+              }))
+            }))
+          }))
         };
       });
       setCategories(cleanedData as Category[]);
@@ -377,21 +465,20 @@ function App() {
             acc[setting.key] = setting.value;
             return acc;
         }, {} as any);
-        
-        // Ambil data tiered_discounts dari promise.all
-        const { data: tieredDiscountsData, error: tieredDiscountsError } = await supabase
-            .from('tiered_discounts')
-            .select('*')
-            .eq('is_active', true)
-            .order('min_spend', { ascending: true });
-
-        if(tieredDiscountsError) {
-            console.error("Error fetching tiered discounts:", tieredDiscountsError);
-        } else {
-            settingsMap['tiered_discounts'] = tieredDiscountsData;
-        }
-
         setAppSettings(settingsMap);
+    }
+
+    // Proses Tiered Discounts
+    const { data: tieredDiscountsData, error: tieredDiscountsError } = tieredDiscountsResponse;
+    if(tieredDiscountsError) {
+        console.error("Error fetching tiered discounts:", tieredDiscountsError);
+    } else if (tieredDiscountsData) {
+        setTieredDiscounts(tieredDiscountsData);
+        // Tambahkan ke appSettings juga untuk kompatibilitas
+        setAppSettings((prev: any) => ({
+            ...prev,
+            tiered_discounts: tieredDiscountsData
+        }));
     }
 
     setLoading(false);
@@ -429,11 +516,27 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} />} />
+        <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} tieredDiscounts={tieredDiscounts} />} />
         
-        {/* Rute Admin diaktifkan di sini */}
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        {/* Rute yang hanya bisa diakses oleh user yang belum login */}
+        <Route 
+          path="/signin"
+          element={
+            <GuestRoute>
+              <SignIn />
+            </GuestRoute>
+          } 
+        />
+        <Route 
+          path="/signup"
+          element={
+            <GuestRoute>
+              <SignUp />
+            </GuestRoute>
+          }
+        />
+        
+        {/* Rute Admin yang dilindungi */}
         <Route 
           path="/admin"
           element={

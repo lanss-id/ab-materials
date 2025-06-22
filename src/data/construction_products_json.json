@@ -8,33 +8,159 @@
         "description": "Besi beton yang telah memenuhi Standar Nasional Indonesia, menjamin kualitas dan kekuatan untuk struktur kritis.",
         "brands": [
           {
-            "name": "TJ/MSI",
+            "name": "TS280",
             "products": [
-              { "name": "8 TJ/MSI", "price": 43181, "image": "besi-ulir.jpg", "metadata": { "diameter_mm": 8, "panjang": "12m", "kuat_tarik": "±250 MPa" } },
-              { "name": "10 TJ/MSI", "price": 67392, "image": "besi-ulir.jpg", "metadata": { "diameter_mm": 10, "panjang": "12m", "kuat_tarik": "±250 MPa" } },
-              { "name": "12 TJ/MSI", "price": 97469, "image": "besi-ulir.jpg", "metadata": { "diameter_mm": 12, "panjang": "12m", "kuat_tarik": "±250 MPa" } }
+              {
+                "name": "8MM",
+                "price": 50856,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 8
+                }
+              },
+              {
+                "name": "10MM",
+                "price": 79435,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 10
+                }
+              },
+              {
+                "name": "12MM",
+                "price": 115393,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 12
+                }
+              },
+              {
+                "name": "D10MM ULIR",
+                "price": 80371,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 10
+                }
+              },
+              {
+                "name": "D13MM ULIR",
+                "price": 135720,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 13
+                }
+              },
+              {
+                "name": "D16MM ULIR",
+                "price": 206294,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 16
+                }
+              },
+              {
+                "name": "D19MM ULIR",
+                "price": 290909,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 19
+                }
+              },
+              {
+                "name": "D22MM ULIR",
+                "price": 393120,
+                "image": "besi-ulir-sni.jpg",
+                "metadata": {
+                  "diameter_mm": 22
+                }
+              }
             ]
           },
           {
-            "name": "TS280",
+            "name": "TJ/MSI",
             "products": [
-              { "name": "8mm", "price": 48737, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 8, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "10mm", "price": 76125, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "12mm", "price": 111108, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 12, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "D10MM Ulir", "price": 77022, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "D13MM Ulir", "price": 130065, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 13, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "D16MM Ulir", "price": 197699, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 16, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "D19MM Ulir", "price": 278788, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 19, "kuat_tarik": "Min 280 MPa" } },
-              { "name": "D22MM Ulir", "price": 376740, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 22, "kuat_tarik": "Min 280 MPa" } }
+              {
+                "name": "8 TJ/MSI",
+                "price": 43181,
+                "image": "besi-ulir.jpg",
+                "metadata": {
+                  "diameter_mm": 8
+                }
+              },
+              {
+                "name": "10 TJ/MSI",
+                "price": 67392,
+                "image": "besi-ulir.jpg",
+                "metadata": {
+                  "diameter_mm": 10
+                }
+              },
+              {
+                "name": "12 TJ/MSI",
+                "price": 97469,
+                "image": "besi-ulir.jpg",
+                "metadata": {
+                  "diameter_mm": 12
+                }
+              }
+            ]
+          },
+          {
+            "name": "SRB/YES",
+            "products": [
+              {
+                "name": "8 SRB/YES",
+                "price": 43160,
+                "image": "besi-ulir.jpg",
+                "metadata": {
+                  "diameter_mm": 8
+                }
+              },
+              {
+                "name": "10 SRB/YES",
+                "price": 67340,
+                "image": "besi-ulir.jpg",
+                "metadata": {
+                  "diameter_mm": 10
+                }
+              }
             ]
           },
           {
             "name": "TS420",
             "products": [
-              { "name": "D10MM ULIR TS420", "price": 87555, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "Min 420 MPa" } },
-              { "name": "D13MM ULIR TS420", "price": 147875, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 13, "kuat_tarik": "Min 420 MPa" } },
-              { "name": "D16MM ULIR TS420", "price": 224770, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 16, "kuat_tarik": "Min 420 MPa" } },
-              { "name": "D19MM ULIR TS420", "price": 317070, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 19, "kuat_tarik": "Min 420 MPa" } }
+              {
+                "name": "D10MM ULIR TS420",
+                "price": 87555,
+                "image": "besi-ulir-ts420.jpg",
+                "metadata": {
+                  "diameter_mm": 10
+                }
+              },
+              {
+                "name": "D13MM ULIR TS420",
+                "price": 147875,
+                "image": "besi-ulir-ts420.jpg",
+                "metadata": {
+                  "diameter_mm": 13
+                }
+              },
+              {
+                "name": "D16MM ULIR TS420",
+                "price": 224770,
+                "image": "besi-ulir-ts420.jpg",
+                "metadata": {
+                  "diameter_mm": 16
+                }
+              },
+              {
+                "name": "D19MM ULIR TS420",
+                "price": 317070,
+                "image": "besi-ulir-ts420.jpg",
+                "metadata": {
+                  "diameter_mm": 19
+                }
+              }
             ]
           }
         ]
@@ -46,147 +172,32 @@
           {
             "name": "Besi 6 (Polos)",
             "products": [
-              { "name": "4,8mm", "price": 22750, "image": "besi-polos.jpg", "metadata": { "diameter_mm": 4.8, "kuat_tarik": "±250 MPa" } },
-              { "name": "5,2mm", "price": 27950, "image": "besi-polos.jpg", "metadata": { "diameter_mm": 5.2, "kuat_tarik": "±250 MPa" } },
-              { "name": "6mm Std", "price": 32500, "image": "besi-polos.jpg", "metadata": { "diameter_mm": 6, "kuat_tarik": "±250 MPa" } }
-            ]
-          },
-          {
-            "name": "SRB/YES",
-            "products": [
-              { "name": "8 SRB/YES", "price": 43160, "image": "besi-ulir.jpg", "metadata": { "diameter_mm": 8, "kuat_tarik": "±250 MPa" } },
-              { "name": "10 SRB/YES", "price": 67340, "image": "besi-ulir.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "±250 MPa" } }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "category": "Sekrup",
-    "description": "Sekrup khusus konstruksi untuk berbagai aplikasi pemasangan material bangunan.",
-    "brands": [
-      {
-        "name": "Sekrup Umum",
-        "products": [
-          { "name": "Gypsum #6 – 1\"", "price": 145600, "image": "sekrup-gypsum.jpg", "metadata": { "ukuran": "6 x 25mm", "aplikasi": "Pemasangan papan gypsum ke rangka baja ringan" } },
-          { "name": "Gypsum #6 – 1 1/4\"", "price": 193440, "image": "sekrup-gypsum.jpg", "metadata": { "ukuran": "6 x 32mm", "aplikasi": "Pemasangan gypsum tebal atau double layer" } },
-          { "name": "Baja Ringan #10–16 (500 pcs)", "price": 143208, "image": "sekrup-baja-ringan.jpg", "metadata": { "ukuran": "10 x 16mm", "aplikasi": "Sambungan antar profil baja ringan" } },
-          { "name": "Baja Ringan #10–19 (500 pcs)", "price": 154440, "image": "sekrup-baja-ringan.jpg", "metadata": { "ukuran": "10 x 19mm", "aplikasi": "Sambungan baja ringan dengan material tebal" } },
-          { "name": "Roofing 12x70 (dus)", "price": 262080, "image": "sekrup-roofing.jpg", "metadata": { "ukuran": "12 x 70mm", "aplikasi": "Pemasangan atap spandek/genteng metal ke rangka" } },
-          { "name": "Roofing 12x60 (dus)", "price": 234000, "image": "sekrup-roofing.jpg", "metadata": { "ukuran": "12 x 60mm", "aplikasi": "Pemasangan atap ke rangka dengan ketebalan sedang" } },
-          { "name": "Baud / Roofseal (isi 20 set) double layer 10mm", "price": 70200, "image": "sekrup-roofing.jpg", "metadata": { "ukuran": "10mm dengan seal", "aplikasi": "Sambungan kedap air untuk atap dan struktur" } }
-        ]
-      }
-    ]
-  },
-  {
-    "category": "Baja Ringan",
-    "description": "Profil baja ringan galvanis untuk rangka atap dan struktur ringan.",
-    "brands": [
-      {
-        "name": "Bukit",
-        "products": [
-          { "name": "C75X0.70", "price": 84448, "image": "baja-ringan-c75.jpg", "metadata": { "profil": "C-Channel", "dimensi": "75mm x 0.70mm" } },
-          { "name": "C75X0.75 (E)", "price": 90272, "image": "baja-ringan-c75.jpg", "metadata": { "profil": "C-Channel", "dimensi": "75mm x 0.75mm", "warna": "Kuning" } },
-          { "name": "C75X0.75 (F)", "price": 93576, "image": "baja-ringan-c75.jpg", "metadata": { "profil": "C-Channel", "dimensi": "75mm x 0.75mm", "warna": "Ungu" } },
-          { "name": "R28X0.35", "price": 42484, "image": "baja-ringan-reng.jpg", "metadata": { "profil": "Reng", "dimensi": "28mm x 0.35mm" } },
-          { "name": "R30X0.40", "price": 50388, "image": "baja-ringan-reng.jpg", "metadata": { "profil": "Reng", "dimensi": "30mm x 0.40mm" } }
-        ]
-      }
-    ]
-  },
-  {
-    "category": "Atap",
-    "description": "Berbagai jenis penutup atap untuk bangunan residensial dan komersial.",
-    "sub_categories": [
-      {
-        "name": "Metal",
-        "brands": [
-          {
-            "name": "Spandek Zincalume",
-            "products": [
-              { "name": "0.35mm x 1m x 6m", "price": 53872, "image": "spandek.jpg", "metadata": { "grade": "Standard" } },
-              { "name": "0.35mm x 1m x 6m Premium", "price": 58240, "image": "spandek.jpg", "metadata": { "grade": "Premium quality" } }
-            ]
-          },
-          {
-            "name": "Spandek Pasir",
-            "products": [
-              { "name": "Merah x6m", "price": 62608, "image": "spandek-pasir.jpg", "metadata": { "dimensi": "6 meter", "warna": "Merah" } },
-              { "name": "Hitam x6m", "price": 62608, "image": "spandek-pasir.jpg", "metadata": { "dimensi": "6 meter", "warna": "Hitam" } }
-            ]
-          },
-          {
-            "name": "Genteng Pasir",
-            "products": [
-              { "name": "Merah", "price": 33488, "image": "genteng-pasir.jpg", "metadata": { "warna": "Merah" } },
-              { "name": "Hitam", "price": 33488, "image": "genteng-pasir.jpg", "metadata": { "warna": "Hitam" } }
+              {
+                "name": "4,8mm",
+                "price": 22750,
+                "image": "besi-polos.jpg",
+                "metadata": {
+                  "diameter_mm": 4.8
+                }
+              },
+              {
+                "name": "5,2mm",
+                "price": 27950,
+                "image": "besi-polos.jpg",
+                "metadata": {
+                  "diameter_mm": 5.2
+                }
+              },
+              {
+                "name": "6mm Std",
+                "price": 32500,
+                "image": "besi-polos.jpg",
+                "metadata": {
+                  "diameter_mm": 6
+                }
+              }
             ]
           }
-        ]
-      },
-      {
-        "name": "UPVC",
-        "brands": [
-          {
-            "name": "Atap UPVC",
-            "products": [
-              { "name": "Putih Doff", "price": 111384, "image": "atap-upvc.jpg", "metadata": { "finishing": "Doff/matte white" } },
-              { "name": "Double Layer (830x10mm)", "price": 668304, "image": "atap-upvc.jpg", "metadata": { "struktur": "Double wall" } }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "category": "Aksesoris Konstruksi",
-    "description": "Produk pendukung untuk berbagai pekerjaan konstruksi.",
-    "brands": [
-      {
-        "name": "Paku",
-        "products": [
-          { "name": "1,5\" (4CM)", "price": 362544, "image": "paku.jpg", "metadata": { "kemasan": "kg" } },
-          { "name": "2\" (5CM)", "price": 347808, "image": "paku.jpg", "metadata": { "kemasan": "kg" } },
-          { "name": "3\" (7CM)", "price": 347808, "image": "paku.jpg", "metadata": { "kemasan": "kg" } },
-          { "name": "4\" (10CM)", "price": 347802, "image": "paku.jpg", "metadata": { "kemasan": "kg" } },
-          { "name": "5\" (12CM)", "price": 347802, "image": "paku.jpg", "metadata": { "kemasan": "kg" } }
-        ]
-      },
-      {
-        "name": "Kawat Beton",
-        "products": [
-          { "name": "Per Roll", "price": 351520, "image": "kawat-beton.jpg", "metadata": { "berat_estimasi": "260kg per roll" } }
-        ]
-      },
-      {
-        "name": "WD Cutting",
-        "products": [
-          { "name": "Per Dus", "price": 81120, "image": "wd-cutting.jpg", "metadata": { "isi_estimasi": "Sekitar 60 pieces per dus" } }
-        ]
-      }
-    ]
-  },
-  {
-    "category": "Struktur Lantai",
-    "description": "Material untuk pembuatan struktur lantai beton yang kuat dan efisien.",
-    "brands": [
-      {
-        "name": "Bondeck",
-        "products": [
-          { "name": "0.65mm x 1m x 6m", "price": 107744, "image": "bondeck.jpg", "metadata": { "ketebalan": "0.65mm" } },
-          { "name": "0.70mm x 1m x 6m", "price": 122304, "image": "bondeck.jpg", "metadata": { "ketebalan": "0.70mm" } },
-          { "name": "0.75mm x 1m x 6m", "price": 129584, "image": "bondeck.jpg", "metadata": { "ketebalan": "0.75mm" } }
-        ]
-      },
-      {
-        "name": "Wiremesh",
-        "products": [
-          { "name": "M6", "price": 287196, "image": "wiremesh.jpg", "metadata": { "diameter_kawat": "6mm" } },
-          { "name": "M7", "price": 409500, "image": "wiremesh.jpg", "metadata": { "diameter_kawat": "7mm" } },
-          { "name": "M8", "price": 556920, "image": "wiremesh.jpg", "metadata": { "diameter_kawat": "8mm" } },
-          { "name": "M10", "price": 922740, "image": "wiremesh.jpg", "metadata": { "diameter_kawat": "10mm" } }
         ]
       }
     ]

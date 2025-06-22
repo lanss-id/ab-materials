@@ -22,6 +22,7 @@ interface Product {
   price: number;
   image_url?: string;
   metadata: any;
+  unitName?: string;
 }
 
 interface Brand {
@@ -134,7 +135,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
           ) : (
             <div className="text-lg font-bold text-blue-700">{formatPrice(product.price)}</div>
           )}
-          <div className="text-xs text-slate-500">per unit</div>
+          <div className="text-xs text-slate-700 font-semibold">{product.unitName || 'per unit'}</div>
         </td>
         
         <td className="px-6 py-4">

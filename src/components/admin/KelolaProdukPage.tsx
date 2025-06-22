@@ -11,6 +11,8 @@ interface Product {
   categoryName?: string;
   subCategoryName?: string;
   brandName?: string;
+  unitName?: string; // satuan produk
+  unit_id?: number; // id unit
   metadata?: any;
 }
 
@@ -31,6 +33,11 @@ interface Brand {
   name: string;
 }
 
+interface Unit {
+  id: number;
+  name: string;
+}
+
 interface KelolaProdukPageProps {
   products: Product[];
   refreshData: () => void;
@@ -41,7 +48,8 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showSubCategoryModal, setShowSubCategoryModal] = useState(false);
   const [showBrandModal, setShowBrandModal] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Partial<Product> & { category_id?: number; sub_category_id?: number; brand_id?: number } | null>(null);
+  const [showUnitModal, setShowUnitModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Partial<Product> & { category_id?: number; sub_category_id?: number; brand_id?: number; unit_id?: number } | null>(null);
   
   // State untuk manajemen Kategori
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -56,12 +64,17 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [newBrandName, setNewBrandName] = useState('');
 
+  // State untuk manajemen Satuan
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [newUnitName, setNewUnitName] = useState('');
+
   const [searchTerm, setSearchTerm] = useState('');
   
   // State untuk dropdowns
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [allSubCategories, setAllSubCategories] = useState<SubCategory[]>([]);
   const [allBrands, setAllBrands] = useState<Brand[]>([]);
+  const [allUnits, setAllUnits] = useState<Unit[]>([]);
 
   const fetchCategories = async () => {
     const { data: categoriesData } = await supabase.from('categories').select('id, name').order('name');
@@ -78,12 +91,18 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     if (brandsData) setAllBrands(brandsData);
   };
 
+  const fetchUnits = async () => {
+    const { data: unitsData } = await supabase.from('units').select('id, name').order('name');
+    if (unitsData) setAllUnits(unitsData);
+  };
+
   // Ambil data master untuk dropdown saat komponen dimuat
   useEffect(() => {
     const fetchMasterData = async () => {
       fetchCategories();
       fetchSubCategories();
       fetchBrands();
+      fetchUnits();
     };
     fetchMasterData();
   }, []);
@@ -248,22 +267,69 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     }
   };
 
+  const handleCancelEditUnit = () => {
+    setEditingUnit(null);
+    setNewUnitName('');
+  };
+
+  const handleEditUnit = (unit: Unit) => {
+    setEditingUnit(unit);
+    setNewUnitName(unit.name);
+  };
+
+  const handleSaveUnit = async () => {
+    if (!newUnitName.trim()) {
+      alert('Nama satuan tidak boleh kosong.');
+      return;
+    }
+    const upsertData = { name: newUnitName.trim() };
+    let error;
+    if (editingUnit?.id) {
+      const { error: updateError } = await supabase.from('units').update(upsertData).eq('id', editingUnit.id);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase.from('units').insert(upsertData);
+      error = insertError;
+    }
+    if (error) {
+      alert('Gagal menyimpan satuan: ' + error.message);
+    } else {
+      alert(`Satuan berhasil ${editingUnit ? 'diperbarui' : 'ditambahkan'}!`);
+      handleCancelEditUnit();
+      await fetchUnits();
+    }
+  };
+
+  const handleDeleteUnit = async (unitId: number) => {
+    if (window.confirm('Apakah Anda yakin ingin menghapus satuan ini?')) {
+      const { error } = await supabase.from('units').delete().eq('id', unitId);
+      if (error) {
+        alert('Gagal menghapus satuan: ' + error.message);
+      } else {
+        alert('Satuan berhasil dihapus.');
+        await fetchUnits();
+      }
+    }
+  };
+
   const handleEditProduct = (product: Product) => {
     const category = allCategories.find(c => c.name === product.categoryName);
     const subCategory = allSubCategories.find(s => s.name === product.subCategoryName);
     const brand = allBrands.find(b => b.name === product.brandName);
+    const unit = allUnits.find(u => u.name === product.unitName);
 
     setEditingProduct({
         ...product,
         category_id: category?.id,
         sub_category_id: subCategory?.id,
         brand_id: brand?.id,
+        unit_id: unit?.id,
     });
     setShowProductModal(true);
   };
 
   const handleAddProduct = () => {
-    setEditingProduct({ name: '', price: 0, metadata: {} });
+    setEditingProduct({ name: '', price: 0, metadata: {}, unit_id: undefined });
     setShowProductModal(true);
   };
 
@@ -274,6 +340,7 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
       name: editingProduct.name,
       price: editingProduct.price,
       brand_id: editingProduct.brand_id,
+      unit_id: editingProduct.unit_id,
       metadata: typeof editingProduct.metadata === 'string' 
         ? JSON.parse(editingProduct.metadata) 
         : editingProduct.metadata,
@@ -349,6 +416,12 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
             className="flex items-center space-x-2 bg-gray-200 text-slate-800 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300 transition-colors"
           >
             <span>Kelola Merek</span>
+          </button>
+          <button 
+            onClick={() => setShowUnitModal(true)}
+            className="flex items-center space-x-2 bg-gray-200 text-slate-800 px-4 py-2 rounded-lg shadow-sm hover:bg-gray-300 transition-colors"
+          >
+            <span>Kelola Satuan</span>
           </button>
           <button 
             onClick={handleAddProduct}
@@ -622,6 +695,66 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
         </div>
       )}
 
+      {/* Modal untuk Kelola Satuan */}
+      {showUnitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-6 border-b pb-4">
+              <h2 className="text-2xl font-bold text-slate-800">Kelola Satuan</h2>
+              <button onClick={() => { setShowUnitModal(false); handleCancelEditUnit(); }} className="p-2 rounded-full hover:bg-slate-100">
+                <X className="w-6 h-6 text-slate-600" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {editingUnit ? `Edit: ${editingUnit.name}` : 'Tambah Satuan Baru'}
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    placeholder="Nama satuan..."
+                    value={newUnitName}
+                    onChange={(e) => setNewUnitName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button 
+                    onClick={handleSaveUnit} 
+                    className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:bg-blue-300"
+                    disabled={!newUnitName.trim()}
+                  >
+                    {editingUnit ? <Save className="w-5 h-5"/> : <Plus className="w-5 h-5"/>}
+                  </button>
+                  {editingUnit && (
+                    <button onClick={handleCancelEditUnit} className="flex items-center space-x-2 bg-slate-200 text-slate-800 px-4 py-2 rounded-lg hover:bg-slate-300">
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-4 mt-4">
+                <h3 className="font-semibold text-lg mb-3 text-slate-700">Daftar Satuan</h3>
+                <div className="max-h-80 overflow-y-auto pr-2 space-y-2">
+                  {allUnits.length > 0 ? allUnits.map(unit => (
+                    <div key={unit.id} className="flex justify-between items-center p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                      <span className="text-slate-800">{unit.name}</span>
+                      <div className="flex items-center space-x-2">
+                        <button onClick={() => handleEditUnit(unit)} className="p-2 text-blue-600 hover:text-blue-800"><Edit className="w-4 h-4" /></button>
+                        <button onClick={() => handleDeleteUnit(unit.id)} className="p-2 text-red-600 hover:text-red-800"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="text-center text-slate-500 py-4">Belum ada satuan.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal untuk Tambah/Edit Produk */}
       {showProductModal && editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -673,6 +806,20 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
                     <option value="">Pilih Brand</option>
                     {allBrands.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Satuan</label>
+                  <div className="flex items-center space-x-2">
+                    <select
+                      value={editingProduct.unit_id || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, unit_id: parseInt(e.target.value) })}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    >
+                      <option value="">Pilih Satuan</option>
+                      {allUnits.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                    </select>
+                    <button type="button" onClick={() => setShowUnitModal(true)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-xs">Kelola</button>
+                  </div>
                 </div>
               </div>
               

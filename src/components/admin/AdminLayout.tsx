@@ -1,10 +1,15 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { Settings, Package, Tag, BarChart3, Gift } from 'lucide-react';
+import { Settings, Package, Tag, BarChart3, Gift, LogOut } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 
 const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/signin');
+  };
 
   const navLinks = [
     { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
@@ -32,6 +37,14 @@ const AdminLayout: React.FC = () => {
               <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                 Online
               </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 text-slate-600 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
             </div>
           </div>
         </div>
