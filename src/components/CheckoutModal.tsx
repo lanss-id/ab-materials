@@ -1,6 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, ShoppingCart, Truck, Clock, Shield, AlertCircle, CheckCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Tipe data item di keranjang harus sinkron dengan App.tsx
 interface CartItem {
@@ -92,7 +93,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   const handleProceedToWhatsApp = () => {
     if (!selectedShipping) {
-      alert("Silakan pilih metode pengiriman terlebih dahulu.");
+      toast.error("Silakan pilih metode pengiriman terlebih dahulu.");
       return;
     }
 

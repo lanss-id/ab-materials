@@ -58,7 +58,7 @@ const TieredDiscountBanner: React.FC<TieredDiscountBannerProps> = ({
     const discountElement = hasDiscount ? (
       <span className="flex items-center">
         <span>DISKON {discount.discount_percent}%</span>
-        <Percent className="w-3.5 h-3.5 ml-1.5" />
+        {/* <Percent className="w-3.5 h-3.5 ml-1.5" /> */}
       </span>
     ) : null;
     
@@ -83,27 +83,32 @@ const TieredDiscountBanner: React.FC<TieredDiscountBannerProps> = ({
     return null;
   }
 
+  const MarqueeContent = () => (
+    <div className="flex-shrink-0 flex items-center justify-around">
+      {activeDiscounts.map((discount, index) => (
+        <div 
+          key={`${discount.id}-marquee-${index}`}
+          className="flex items-center space-x-3 mx-6"
+        >
+          <Gift className="w-5 h-5 text-yellow-300 flex-shrink-0" />
+          {renderBenefits(discount)}
+          <span className="text-yellow-300 flex-shrink-0 text-lg">•</span>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div 
-      ref={containerRef}
       className="relative bg-gradient-to-r from-red-500 via-red-600 to-red-500 overflow-hidden shadow-sm group"
     >
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent pointer-events-none" />
       
-      <div 
-        ref={contentRef}
-        className="flex items-center whitespace-nowrap py-3 animate-marquee group-hover:[animation-play-state:paused]"
-      >
-        {[...activeDiscounts, ...activeDiscounts].map((discount, index) => (
-          <div 
-            key={`${discount.id}-${index}`}
-            className="flex items-center space-x-3 mx-6 flex-shrink-0"
-          >
-            <Gift className="w-5 h-5 text-yellow-300 flex-shrink-0 animate-pulse" />
-            {renderBenefits(discount)}
-            <span className="text-yellow-300 flex-shrink-0 text-lg">•</span>
-          </div>
-        ))}
+      <div className="flex whitespace-nowrap py-3">
+        <div className="flex animate-marquee group-hover:[animation-play-state:paused]">
+          <MarqueeContent />
+          <MarqueeContent />
+        </div>
       </div>
     </div>
   );

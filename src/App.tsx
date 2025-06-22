@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { supabase } from './supabaseClient';
 import NestedProductTable from './components/NestedProductTable';
 import ProductShowcase from './components/ProductShowcase';
@@ -8,28 +8,29 @@ import {
   MapPin, Phone, Mail, CheckCircle, Truck, Shield, Clock, FileText
 } from 'lucide-react';
 import CheckoutModal from './components/CheckoutModal';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import PromotionalBanner from './components/PromotionalBanner';
 import TieredDiscountBanner from './components/TieredDiscountBanner';
 
-// Impor komponen Admin
-import AdminLayout from './components/admin/AdminLayout';
-import KelolaProdukPage from './components/admin/KelolaProdukPage';
-import AnalyticsPage from './components/admin/AnalyticsPage';
-import KelolaPromosiPage from './components/admin/KelolaPromosiPage';
-import KelolaDiskonBertingkatPage from './components/admin/KelolaDiskonBertingkatPage';
-import AdminRoute from './components/AdminRoute';
-import SignIn from './components/SignIn';
-import SignUp from './components/SignUp';
-import GuestRoute from './components/GuestRoute';
+// Lazy load komponen
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
+const KelolaProdukPage = lazy(() => import('./components/admin/KelolaProdukPage'));
+const AnalyticsPage = lazy(() => import('./components/admin/AnalyticsPage'));
+const KelolaPromosiPage = lazy(() => import('./components/admin/KelolaPromosiPage'));
+const KelolaDiskonBertingkatPage = lazy(() => import('./components/admin/KelolaDiskonBertingkatPage'));
+const AdminRoute = lazy(() => import('./components/AdminRoute'));
+const SignIn = lazy(() => import('./components/SignIn'));
+const SignUp = lazy(() => import('./components/SignUp'));
+const GuestRoute = lazy(() => import('./components/GuestRoute'));
 
-// Definisi tipe data yang konsisten untuk seluruh aplikasi
+// Definisi tipe data
 interface Product {
   id: number;
   name: string;
   price: number;
   image_url?: string;
   metadata: any;
+  unitName?: string;
 }
 
 interface Brand {
@@ -62,6 +63,14 @@ interface Promotion {
   gimmick_type: 'pulse' | 'glow' | 'shake' | 'countdown';
   type: 'sitewide' | 'product_specific';
   promoted_product_ids?: Set<number>;
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex justify-center items-center h-screen w-full">
+      <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
+    </div>
+  );
 }
 
 function PublicFacingApp({ categories, loading, error, promotion, appSettings, tieredDiscounts }: { categories: Category[], loading: boolean, error: string | null, promotion: Promotion | null, appSettings: any, tieredDiscounts: any[] }) {
@@ -125,7 +134,6 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
           return sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
         case 'name-desc':
           return sorted.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
-        case 'default':
         default:
           return sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
       }
@@ -158,15 +166,19 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
       <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-slate-200/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-700 p-2 rounded-lg">
-                <Building2 className="h-6 w-6 text-white" />
-              </div>
+            <Link to="/" className="flex items-center space-x-3">
+              <img 
+                src="/logo.jpeg" 
+                alt="AB Material Logo" 
+                className="h-12 w-auto" 
+                width="135" 
+                height="48"
+              />
               <div>
                 <h1 className="text-xl font-bold text-slate-800">AB Material</h1>
                 <p className="text-xs text-slate-500">Material Konstruksi Terpercaya</p>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </header>
@@ -197,6 +209,16 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
         {/* hero section */}
         <section className="relative bg-gradient-to-b from-blue-50 via-slate-50 to-orange-50 pt-16 pb-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="flex flex-wrap justify-center gap-3 mb-8">
+              <div className="flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium">
+                <MapPin className="h-4 w-4" />
+                <span>Bandung</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-orange-100 text-orange-800 px-4 py-2 rounded-full text-sm font-medium">
+                <MapPin className="h-4 w-4" />
+                <span>Jabodetabek</span>
+              </div>
+            </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-slate-800 mb-4 leading-tight">
               Pemasok Material <span className="block text-blue-700">Konstruksi Tepercaya</span>
             </h1>
@@ -252,17 +274,33 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
                 </select>
               </div>
 
-              {/* --- Kontrol View Mode --- */}
-               <div className="flex items-center bg-slate-200 rounded-lg p-1 border border-slate-300">
-                <button onClick={() => setViewMode('showcase')} className={`p-2 rounded-md ${viewMode === 'showcase' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}><LayoutGrid className="h-5 w-5" /></button>
-                <button onClick={() => setViewMode('table')} className={`p-2 rounded-md ${viewMode === 'table' ? 'bg-white shadow text-blue-600' : 'text-slate-500'}`}><List className="h-5 w-5" /></button>
+              {/* --- Kontrol Tampilan --- */}
+              <div className="hidden sm:flex items-center space-x-1 bg-slate-200 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${viewMode === 'table' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:bg-slate-300/50'}`}
+                >
+                  <List className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('showcase')}
+                  className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${viewMode === 'showcase' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-600 hover:bg-slate-300/50'}`}
+                >
+                  <LayoutGrid className="w-5 h-5" />
+                </button>
               </div>
             </div>
-
+            
             {loading ? (
-              <div className="flex justify-center items-center h-96"><Loader2 className="w-12 h-12 text-blue-600 animate-spin" /></div>
+              <div className="flex justify-center py-20">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+              </div>
             ) : error ? (
-              <div className="text-center bg-red-100 p-6 rounded-lg"><ServerCrash className="w-12 h-12 mx-auto mb-4 text-red-500" /><h3 className="text-xl font-semibold">Gagal memuat data</h3><p>{error}</p></div>
+              <div className="text-center py-20 bg-red-50 border border-red-200 rounded-lg">
+                <ServerCrash className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-red-700">Oops! Terjadi Kesalahan</h3>
+                <p className="text-red-600 mt-2">{error}</p>
+              </div>
             ) : (
               viewMode === 'table' ? (
                 <NestedProductTable categories={sortedCategories} quantities={quantities} onQuantityChange={handleQuantityChange} getDiscountForProduct={getDiscountForProduct} />
@@ -319,18 +357,20 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
         </footer>
       </main>
 
-      {/* Tombol Keranjang Floating */}
-      {cartItems.length > 0 && (
-        <button
-          onClick={() => setCheckoutModalOpen(true)}
-          className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-transform transform hover:scale-110 z-40"
-          aria-label={`Buka keranjang, ${totalItemsInCart} item`}
-        >
-          <ShoppingCart className="w-7 h-7" />
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center border-2 border-white">
-            {totalItemsInCart}
-          </div>
-        </button>
+      {/* Tombol Checkout Melayang */}
+      {totalItemsInCart > 0 && (
+        <div className="sticky bottom-0 w-full p-4 bg-gradient-to-t from-slate-200 to-transparent z-40">
+           <button
+            onClick={() => setCheckoutModalOpen(true)}
+            className="w-full max-w-md mx-auto flex items-center justify-between px-6 py-4 bg-orange-600 text-white font-bold rounded-xl shadow-2xl hover:bg-orange-700 transition-transform transform hover:scale-105"
+          >
+            <div className="flex items-center space-x-3">
+              <ShoppingCart className="w-6 h-6" />
+              <span>Checkout ({totalItemsInCart} item)</span>
+            </div>
+            <span className="text-lg">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalBelanjaBruto)}</span>
+          </button>
+        </div>
       )}
 
       {isCheckoutModalOpen && (
@@ -347,12 +387,13 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
 }
 
 function App() {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [activePromotion, setActivePromotion] = useState<Promotion | null>(null);
   const [appSettings, setAppSettings] = useState<any>({});
   const [tieredDiscounts, setTieredDiscounts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -400,7 +441,6 @@ function App() {
       console.error('Error fetching products:', productsError);
       setError('Terjadi kesalahan saat mengambil data produk dari server. Silakan coba lagi nanti.');
     } else if (productsData) {
-      // Saring data untuk menghilangkan duplikasi brand
       const cleanedData = productsData.map(category => {
         const brandIdsInSubCategories = new Set(
           category.sub_categories.flatMap(sc => sc.brands.map(b => b.id))
@@ -408,7 +448,6 @@ function App() {
         const directBrands = category.brands.filter(
           brand => !brandIdsInSubCategories.has(brand.id)
         );
-        // Mapping unitName di brands dan sub_categories
         return {
           ...category,
           brands: directBrands.map(brand => ({
@@ -435,7 +474,6 @@ function App() {
 
     const { data: promotionData, error: promotionError } = promotionResponse;
     if (promotionError) {
-      // Jangan blokir UI hanya karena promo gagal dimuat
       console.error('Error fetching promotion:', promotionError);
     } else if (promotionData) {
         if (promotionData.type === 'product_specific') {
@@ -446,7 +484,7 @@ function App() {
             
             if (promoProductsError) {
                 console.error("Error fetching promoted products", promoProductsError);
-                setActivePromotion(promotionData); // Tampilkan promo meski produk gagal diambil
+                setActivePromotion(promotionData);
             } else {
                 const promoted_product_ids = new Set(promoProducts.map(p => p.product_id));
                 setActivePromotion({ ...promotionData, promoted_product_ids });
@@ -456,7 +494,6 @@ function App() {
         }
     }
     
-    // Proses App Settings
     const { data: settingsData, error: settingsError } = settingsResponse;
     if(settingsError) {
         console.error("Error fetching app settings:", settingsError);
@@ -465,16 +502,14 @@ function App() {
             acc[setting.key] = setting.value;
             return acc;
         }, {} as any);
-        setAppSettings(settingsMap);
+       setAppSettings(settingsMap);
     }
 
-    // Proses Tiered Discounts
     const { data: tieredDiscountsData, error: tieredDiscountsError } = tieredDiscountsResponse;
     if(tieredDiscountsError) {
         console.error("Error fetching tiered discounts:", tieredDiscountsError);
     } else if (tieredDiscountsData) {
-        setTieredDiscounts(tieredDiscountsData);
-        // Tambahkan ke appSettings juga untuk kompatibilitas
+       setTieredDiscounts(tieredDiscountsData);
         setAppSettings((prev: any) => ({
             ...prev,
             tiered_discounts: tieredDiscountsData
@@ -482,78 +517,83 @@ function App() {
     }
 
     setLoading(false);
-  }
+  };
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
     fetchData();
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Format data untuk halaman kelola produk
-  const allProductsRaw = categories.flatMap(category =>
-    [
-      ...category.brands.flatMap(brand => 
-        brand.products.map(p => ({
-          ...p,
-          categoryName: category.name,
-          brandName: brand.name
-        }))
-      ),
-      ...category.sub_categories.flatMap(sc => 
-        sc.brands.flatMap(brand => 
+  const allProductsForAdmin = useMemo(() => {
+    const allProductsRaw = categories.flatMap(category =>
+      [
+        ...category.brands.flatMap(brand => 
           brand.products.map(p => ({
             ...p,
             categoryName: category.name,
-            subCategoryName: sc.name,
             brandName: brand.name
           }))
+        ),
+        ...category.sub_categories.flatMap(sc => 
+          sc.brands.flatMap(brand => 
+            brand.products.map(p => ({
+              ...p,
+              categoryName: category.name,
+              subCategoryName: sc.name,
+              brandName: brand.name
+            }))
+          )
         )
-      )
-    ]
-  );
-  // Pastikan daftar produk untuk admin juga unik
-  const allProductsForAdmin = Array.from(new Map(allProductsRaw.map(p => [p.id, p])).values());
+      ]
+    );
+    return Array.from(new Map(allProductsRaw.map(p => [p.id, p])).values());
+  }, [categories]);
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} tieredDiscounts={tieredDiscounts} />} />
-        
-        {/* Rute yang hanya bisa diakses oleh user yang belum login */}
-        <Route 
-          path="/signin"
-          element={
-            <GuestRoute>
-              <SignIn />
-            </GuestRoute>
-          } 
-        />
-        <Route 
-          path="/signup"
-          element={
-            <GuestRoute>
-              <SignUp />
-            </GuestRoute>
-          }
-        />
-        
-        {/* Rute Admin yang dilindungi */}
-        <Route 
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminLayout />
-            </AdminRoute>
-          }
-        >
-          <Route index element={<Navigate to="analytics" replace />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="kelola-produk" element={<KelolaProdukPage products={allProductsForAdmin} refreshData={fetchData} />} />
-          <Route path="kelola-promosi" element={<KelolaPromosiPage refreshData={fetchData} />} />
-          <Route path="kelola-diskon-bertingkat" element={<KelolaDiskonBertingkatPage />} />
-        </Route>
-      </Routes>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} tieredDiscounts={tieredDiscounts} />} />
+          
+          <Route 
+            path="/signin" 
+            element={<GuestRoute><SignIn /></GuestRoute>}
+          />
+          <Route 
+            path="/signup" 
+            element={<GuestRoute><SignUp /></GuestRoute>}
+          />
+          
+          <Route path="/admin"> 
+            <Route index element={
+              <AdminRoute><AdminLayout><Navigate to="/admin/analytics" replace /></AdminLayout></AdminRoute>
+            } />
+            <Route path="analytics" element={
+              <AdminRoute><AdminLayout><AnalyticsPage /></AdminLayout></AdminRoute>
+            } />
+            <Route path="kelola-produk" element={
+              <AdminRoute><AdminLayout><KelolaProdukPage products={allProductsForAdmin} refreshData={fetchData} /></AdminLayout></AdminRoute>
+            } />
+            <Route path="kelola-promosi" element={
+              <AdminRoute><AdminLayout><KelolaPromosiPage refreshData={fetchData} /></AdminLayout></AdminRoute>
+            } />
+            <Route path="kelola-diskon-bertingkat" element={
+              <AdminRoute><AdminLayout><KelolaDiskonBertingkatPage /></AdminLayout></AdminRoute>
+            } />
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
-  )
+  );
 }
 
 export default App;

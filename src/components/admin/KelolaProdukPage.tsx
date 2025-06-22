@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import NestedProductTable from '../NestedProductTable';
 import { Search, Save, X, Plus, Folder, Tag, PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Gabungkan dan bersihkan interface
 interface Product {
@@ -119,7 +120,7 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
 
   const handleSaveCategory = async () => {
     if (!newCategoryName.trim()) {
-      alert('Nama kategori tidak boleh kosong.');
+      toast.error('Nama kategori tidak boleh kosong.');
       return;
     }
 
@@ -137,9 +138,9 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     }
 
     if (error) {
-      alert('Gagal menyimpan kategori: ' + error.message);
+      toast.error('Gagal menyimpan kategori: ' + error.message);
     } else {
-      alert(`Kategori berhasil ${editingCategory ? 'diperbarui' : 'ditambahkan'}!`);
+      toast.success(`Kategori berhasil ${editingCategory ? 'diperbarui' : 'ditambahkan'}!`);
       handleCancelEditCategory();
       await fetchCategories();
       await refreshData();
@@ -147,17 +148,20 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   };
 
   const handleDeleteCategory = async (categoryId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus kategori ini? Tindakan ini tidak dapat dibatalkan.')) {
-      const { error } = await supabase.from('categories').delete().eq('id', categoryId);
-
-      if (error) {
-        alert('Gagal menghapus kategori: ' + error.message);
-      } else {
-        alert('Kategori berhasil dihapus.');
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('categories').delete().eq('id', categoryId);
+        if (error) throw error;
         await fetchCategories();
         await refreshData();
+        return 'Kategori berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus kategori...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus kategori: ' + error.message,
       }
-    }
+    );
   };
 
   const handleCancelEditSubCategory = () => {
@@ -174,7 +178,7 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
 
   const handleSaveSubCategory = async () => {
     if (!newSubCategoryName.trim() || !selectedCategoryIdForSub) {
-      alert('Nama sub-kategori dan kategori induk harus diisi.');
+      toast.error('Nama sub-kategori dan kategori induk harus diisi.');
       return;
     }
 
@@ -193,9 +197,9 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     }
 
     if (error) {
-      alert('Gagal menyimpan sub-kategori: ' + error.message);
+      toast.error('Gagal menyimpan sub-kategori: ' + error.message);
     } else {
-      alert(`Sub-kategori berhasil ${editingSubCategory ? 'diperbarui' : 'ditambahkan'}!`);
+      toast.success(`Sub-kategori berhasil ${editingSubCategory ? 'diperbarui' : 'ditambahkan'}!`);
       handleCancelEditSubCategory();
       await fetchSubCategories();
       await refreshData();
@@ -203,17 +207,20 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   };
 
   const handleDeleteSubCategory = async (subCategoryId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus sub-kategori ini? Tindakan ini tidak dapat dibatalkan.')) {
-      const { error } = await supabase.from('sub_categories').delete().eq('id', subCategoryId);
-
-      if (error) {
-        alert('Gagal menghapus sub-kategori: ' + error.message);
-      } else {
-        alert('Sub-kategori berhasil dihapus.');
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('sub_categories').delete().eq('id', subCategoryId);
+        if (error) throw error;
         await fetchSubCategories();
         await refreshData();
+        return 'Sub-kategori berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus sub-kategori...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus sub-kategori: ' + error.message,
       }
-    }
+    );
   };
 
   const handleCancelEditBrand = () => {
@@ -228,7 +235,7 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
 
   const handleSaveBrand = async () => {
     if (!newBrandName.trim()) {
-      alert('Nama merek tidak boleh kosong.');
+      toast.error('Nama merek tidak boleh kosong.');
       return;
     }
 
@@ -244,9 +251,9 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     }
 
     if (error) {
-      alert('Gagal menyimpan merek: ' + error.message);
+      toast.error('Gagal menyimpan merek: ' + error.message);
     } else {
-      alert(`Merek berhasil ${editingBrand ? 'diperbarui' : 'ditambahkan'}!`);
+      toast.success(`Merek berhasil ${editingBrand ? 'diperbarui' : 'ditambahkan'}!`);
       handleCancelEditBrand();
       await fetchBrands();
       await refreshData();
@@ -254,17 +261,20 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   };
 
   const handleDeleteBrand = async (brandId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus merek ini? Tindakan ini tidak dapat dibatalkan.')) {
-      const { error } = await supabase.from('brands').delete().eq('id', brandId);
-
-      if (error) {
-        alert('Gagal menghapus merek: ' + error.message);
-      } else {
-        alert('Merek berhasil dihapus.');
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('brands').delete().eq('id', brandId);
+        if (error) throw error;
         await fetchBrands();
         await refreshData();
+        return 'Merek berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus merek...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus merek: ' + error.message,
       }
-    }
+    );
   };
 
   const handleCancelEditUnit = () => {
@@ -279,7 +289,7 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
 
   const handleSaveUnit = async () => {
     if (!newUnitName.trim()) {
-      alert('Nama satuan tidak boleh kosong.');
+      toast.error('Nama satuan tidak boleh kosong.');
       return;
     }
     const upsertData = { name: newUnitName.trim() };
@@ -292,24 +302,28 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
       error = insertError;
     }
     if (error) {
-      alert('Gagal menyimpan satuan: ' + error.message);
+      toast.error('Gagal menyimpan satuan: ' + error.message);
     } else {
-      alert(`Satuan berhasil ${editingUnit ? 'diperbarui' : 'ditambahkan'}!`);
+      toast.success(`Satuan berhasil ${editingUnit ? 'diperbarui' : 'ditambahkan'}!`);
       handleCancelEditUnit();
       await fetchUnits();
     }
   };
 
   const handleDeleteUnit = async (unitId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus satuan ini?')) {
-      const { error } = await supabase.from('units').delete().eq('id', unitId);
-      if (error) {
-        alert('Gagal menghapus satuan: ' + error.message);
-      } else {
-        alert('Satuan berhasil dihapus.');
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('units').delete().eq('id', unitId);
+        if (error) throw error;
         await fetchUnits();
+        return 'Satuan berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus satuan...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus satuan: ' + error.message,
       }
-    }
+    );
   };
 
   const handleEditProduct = (product: Product) => {
@@ -363,9 +377,9 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
     }
 
     if (error) {
-      alert('Gagal menyimpan produk: ' + error.message);
+      toast.error('Gagal menyimpan produk: ' + error.message);
     } else {
-      alert('Produk berhasil disimpan!');
+      toast.success('Produk berhasil disimpan!');
       setShowProductModal(false);
       setEditingProduct(null);
       refreshData();
@@ -373,19 +387,19 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
   };
   
   const handleDeleteProduct = async (productId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus produk ini? Produk yang dihapus tidak dapat dikembalikan.')) {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
-
-      if (error) {
-        alert('Gagal menghapus produk: ' + error.message);
-      } else {
-        alert('Produk berhasil dihapus.');
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('products').delete().eq('id', productId);
+        if (error) throw error;
         refreshData(); // Refresh data untuk menghilangkan produk dari tabel
+        return 'Produk berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus produk...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus produk: ' + error.message,
       }
-    }
+    );
   };
 
   const filteredProducts = products.filter(product =>

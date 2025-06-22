@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Tag, Plus, Save, X, Edit, Trash2, Loader2, ShoppingBag, Store } from 'lucide-react';
 import Select from 'react-select';
+import { toast } from 'sonner';
 
 // Tipe ini harus cocok dengan skema tabel 'promotions' di Supabase
 interface Promotion {
@@ -80,7 +81,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
 
     if (productsError || brandsError) {
         console.error('Error fetching data:', productsError || brandsError);
-        alert('Gagal mengambil data produk atau brand.');
+        toast.error('Gagal mengambil data produk atau brand.');
         return;
     }
     
@@ -103,7 +104,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
       
     if (error) {
       console.error('Error fetching promotions:', error);
-      alert('Gagal mengambil data promosi.');
+      toast.error('Gagal mengambil data promosi.');
     } else if (data) {
       setPromotions(data);
     }
@@ -168,7 +169,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
     e.preventDefault();
     
     if (formState.type === 'product_specific' && (!formState.selected_products || formState.selected_products.length === 0)) {
-        alert('Untuk promosi produk spesifik, silakan pilih setidaknya satu produk.');
+        toast.error('Untuk promosi produk spesifik, silakan pilih setidaknya satu produk.');
         return;
     }
 
@@ -207,7 +208,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
     
     if (error) {
         console.error('Error saving promotion:', error);
-        alert('Gagal menyimpan promosi: ' + error.message);
+        toast.error('Gagal menyimpan promosi: ' + error.message);
         setIsSaving(false);
         return;
     }
@@ -220,7 +221,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
             .eq('promotion_id', promotion_id);
         if (deleteError) {
              console.error('Error deleting old promotion products:', deleteError);
-             alert('Gagal memperbarui produk promosi.');
+             toast.error('Gagal memperbarui produk promosi.');
              setIsSaving(false);
              return;
         }
@@ -236,7 +237,7 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
         
         if(insertPromoProductsError) {
             console.error('Error inserting new promotion products:', insertPromoProductsError);
-            alert('Gagal menyimpan produk untuk promosi.');
+            toast.error('Gagal menyimpan produk untuk promosi.');
             setIsSaving(false);
             return;
         }
@@ -249,18 +250,24 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
     await refreshData();
     handleCloseModal();
     setIsSaving(false);
+    toast.success(`Promosi berhasil ${editingPromotion ? 'diperbarui' : 'ditambahkan'}!`);
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus promosi ini? Semua relasi produk terkait juga akan dihapus.')) {
-      const { error } = await supabase.from('promotions').delete().eq('id', id);
-      if (error) {
-        alert('Gagal menghapus promosi: ' + error.message);
-      } else {
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('promotions').delete().eq('id', id);
+        if (error) throw error;
         await fetchData();
         await refreshData();
+        return 'Promosi berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus promosi...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus promosi: ' + error.message,
       }
-    }
+    );
   };
 
   const toggleActiveStatus = async (promo: Promotion) => {
@@ -270,10 +277,11 @@ const KelolaPromosiPage: React.FC<KelolaPromosiPageProps> = ({ refreshData }) =>
       .eq('id', promo.id);
 
     if (error) {
-      alert('Gagal mengubah status: ' + error.message);
+      toast.error('Gagal mengubah status: ' + error.message);
     } else {
       await fetchPromotions();
       await refreshData();
+      toast.success(`Status promosi berhasil diubah menjadi ${!promo.is_active ? 'aktif' : 'nonaktif'}.`);
     }
   }
   

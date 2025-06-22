@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Inter', 'sans-serif'],
+        'sans': ['Helvetica', 'sans-serif'],
       },
       animation: {
         fadeIn: 'fadeIn 1.2s ease-in-out forwards',
@@ -13,7 +13,7 @@ export default {
         patternMove: 'patternMove 30s linear infinite',
         'fade-in': 'fadeIn 0.5s ease-out',
         'slide-up': 'slideUp 0.5s ease-out',
-        'marquee': 'marquee 40s linear infinite',
+        'marquee': 'marquee var(--marquee-duration, 40s) linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -28,8 +28,8 @@ export default {
           '100%': { transform: 'translateY(0)' },
         },
         marquee: {
-          '0%': { transform: 'translateX(0%)' },
-          '100%': { transform: 'translateX(-50%)' },
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
         },
       },
     },

@@ -1,3 +1,19 @@
+/* Font Face Declarations untuk Helvetica */
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/helvetica/Helvetica.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Helvetica';
+  src: url('/helvetica/Helvetica-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,7 +94,7 @@ html {
   body {
     @apply bg-slate-50 text-slate-700 antialiased;
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    font-family: 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -101,6 +117,22 @@ html {
 @keyframes patternMove {
   0% { background-position: 0 0; }
   100% { background-position: 60px 60px; }
+}
+
+:root {
+  --marquee-duration: 32s; /* Mobile default */
+}
+
+@media (min-width: 768px) { /* Tablet */
+  :root {
+    --marquee-duration: 12s;
+  }
+}
+
+@media (min-width: 1024px) { /* Desktop */
+  :root {
+    --marquee-duration: 40s;
+  }
 }
 
 /* Force equal height on product showcase slides */

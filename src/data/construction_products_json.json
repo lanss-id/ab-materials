@@ -16,7 +16,7 @@
             ]
           },
           {
-            "name": "TS280",
+            "name": "TS280 Full Sertifikat",
             "products": [
               { "name": "8mm", "price": 50856, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 8, "kuat_tarik": "Min 280 MPa" } },
               { "name": "10mm", "price": 79435, "image": "besi-ulir-sni.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "Min 280 MPa" } },
@@ -29,7 +29,7 @@
             ]
           },
           {
-            "name": "TS420",
+            "name": "TS420 Full Sertifikat",
             "products": [
               { "name": "D10MM ULIR TS420", "price": 87555, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 10, "kuat_tarik": "Min 420 MPa" } },
               { "name": "D13MM ULIR TS420", "price": 147875, "image": "besi-ulir-ts420.jpg", "metadata": { "diameter_mm": 13, "kuat_tarik": "Min 420 MPa" } },

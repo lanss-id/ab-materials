@@ -1,9 +1,9 @@
 import React from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 import { Settings, Package, Tag, BarChart3, Gift, LogOut } from 'lucide-react';
 import { supabase } from '../../supabaseClient';
 
-const AdminLayout: React.FC = () => {
+const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -24,15 +24,13 @@ const AdminLayout: React.FC = () => {
       <div className="bg-white shadow-lg border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="bg-blue-700 p-2 rounded-lg">
-                <Settings className="h-6 w-6 text-white" />
-              </div>
+            <Link to="/admin" className="flex items-center space-x-3">
+              <img src="/logo.jpeg" alt="AB Material Logo" className="h-12 w-auto" />
               <div>
                 <h1 className="text-xl font-bold text-slate-800">Admin Panel</h1>
                 <p className="text-xs text-slate-500">AB Material Management System</p>
               </div>
-            </div>
+            </Link>
             <div className="flex items-center space-x-4">
               <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                 Online
@@ -75,7 +73,7 @@ const AdminLayout: React.FC = () => {
         </div>
 
         {/* Page Content */}
-        <Outlet />
+        {children}
       </div>
     </div>
   );

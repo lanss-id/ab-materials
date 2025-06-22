@@ -114,12 +114,10 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         <td className="px-6 py-4">
           <div className="space-y-1 text-sm text-slate-600 max-w-xs">
             {Object.entries(product.metadata).map(([key, value]) => {
-              // Jika nilai terlalu panjang, kita bisa handle secara berbeda jika perlu
-              const isLongValue = String(value).length > 30;
               return (
-                <div key={key} className="flex items-start text-xs">
-                  <div className="w-1/3 font-medium capitalize text-slate-500 shrink-0">{key.replace(/_/g, ' ')}:</div>
-                  <div className="w-2/3 font-semibold text-slate-700">{String(value)}</div>
+                <div key={key} className="sm:flex sm:items-start text-[11px] sm:text-xs">
+                  <div className="sm:w-1/3 font-medium capitalize text-slate-500 shrink-0">{key.replace(/_/g, ' ')}:</div>
+                  <div className="pl-2 sm:pl-0 sm:w-2/3 font-semibold text-slate-700">{String(value)}</div>
                 </div>
               );
             })}

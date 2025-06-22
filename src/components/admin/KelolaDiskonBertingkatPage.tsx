@@ -186,16 +186,19 @@ const KelolaDiskonBertingkatPage: React.FC = () => {
   };
   
   const handleDeleteTier = async (tierId: number) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus tingkatan diskon ini?')) {
-        try {
-            const { error } = await supabase.from('tiered_discounts').delete().eq('id', tierId);
-            if (error) throw error;
-            toast.success('Tingkatan diskon berhasil dihapus.');
-            fetchSettings(); // Refresh data
-        } catch (error: any) {
-            toast.error('Gagal menghapus: ' + error.message);
-        }
-    }
+    toast.promise(
+      (async () => {
+        const { error } = await supabase.from('tiered_discounts').delete().eq('id', tierId);
+        if (error) throw error;
+        await fetchSettings(); // Refresh data
+        return 'Tingkatan diskon berhasil dihapus.';
+      })(),
+      {
+        loading: 'Menghapus tingkatan diskon...',
+        success: (message) => message,
+        error: (error) => 'Gagal menghapus: ' + error.message,
+      }
+    );
   };
 
   if (loading) {
