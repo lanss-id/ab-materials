@@ -90,7 +90,7 @@ const PromotionalBanner: React.FC<PromotionalBannerProps> = ({
                 <div className="text-4xl lg:text-6xl font-black text-white">
                   {discountPercent}%
                 </div>
-                <div className="text-sm text-white/80 font-medium">DISKON</div>
+                <div className="text-sm text-white/80 font-medium md:pl-3">DISKON</div>
               </div>
               <div className="text-white">
                 <Zap className="h-8 w-8 mb-2 animate-bounce" />
