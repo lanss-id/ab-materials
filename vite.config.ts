@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
+    include: ['react-select'],
     exclude: ['lucide-react'],
   },
   build: {
@@ -16,6 +17,11 @@ export default defineConfig({
           'icons-vendor': ['lucide-react'],
         },
       },
+    },
+  },
+  server: {
+    hmr: {
+      overlay: false,
     },
   },
 });

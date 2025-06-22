@@ -144,3 +144,157 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Custom scrollbar untuk mobile */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Animasi untuk mobile tutorial */
+  .mobile-tutorial-enter {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  .mobile-tutorial-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  .mobile-tutorial-exit {
+    opacity: 1;
+    transform: scale(1);
+  }
+  
+  .mobile-tutorial-exit-active {
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  /* Animasi untuk card mobile */
+  .mobile-card-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  .mobile-card-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  /* Pulse animation untuk scroll hint */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+  }
+  
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Smooth scroll behavior */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    /* Improve touch targets */
+    button, a {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Better spacing for mobile */
+    .mobile-spacing {
+      padding: 1rem;
+    }
+    
+    /* Card shadows for better depth */
+    .mobile-card {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.2s ease;
+    }
+    
+    .mobile-card:active {
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Table improvements for mobile */
+    .mobile-table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    .mobile-table-container::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Ensure table cells are readable on mobile */
+    .mobile-table-cell {
+      white-space: nowrap;
+      min-width: 120px;
+    }
+    
+    .mobile-table-cell-product {
+      min-width: 200px;
+    }
+    
+    .mobile-table-cell-specs {
+      min-width: 150px;
+    }
+    
+    .mobile-table-cell-price {
+      min-width: 100px;
+    }
+    
+    .mobile-table-cell-qty {
+      min-width: 100px;
+    }
+    
+    .mobile-table-cell-action {
+      min-width: 120px;
+    }
+  }
+}
+
+/* Fix untuk overlay tutorial */
+.mobile-tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-tutorial-content {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-width: 24rem;
+  width: 90%;
+  margin: 0 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}

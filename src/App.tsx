@@ -11,6 +11,7 @@ import CheckoutModal from './components/CheckoutModal';
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import PromotionalBanner from './components/PromotionalBanner';
 import TieredDiscountBanner from './components/TieredDiscountBanner';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load komponen
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
@@ -263,7 +264,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
         <section id="katalog" className="py-16 bg-gradient-to-b from-orange-50 to-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-slate-800 mb-4">Katalog Produk</h2>
+              <h2 className="text-4xl font-bold text-slate-800 mb-4">Katalog Material Konstruksi</h2>
               <p className="text-xl text-slate-600 max-w-3xl mx-auto">Jelajahi koleksi lengkap material konstruksi kami.</p>
             </div>
             
@@ -612,38 +613,40 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} tieredDiscounts={tieredDiscounts} />} />
-          
-          <Route 
-            path="/signin" 
-            element={<GuestRoute><SignIn /></GuestRoute>}
-          />
-          <Route 
-            path="/signup" 
-            element={<GuestRoute><SignUp /></GuestRoute>}
-          />
-          
-          <Route path="/admin"> 
-            <Route index element={
-              <AdminRoute><AdminLayout><Navigate to="/admin/analytics" replace /></AdminLayout></AdminRoute>
-            } />
-            <Route path="analytics" element={
-              <AdminRoute><AdminLayout><AnalyticsPage /></AdminLayout></AdminRoute>
-            } />
-            <Route path="kelola-produk" element={
-              <AdminRoute><AdminLayout><KelolaProdukPage products={allProductsForAdmin} refreshData={fetchData} /></AdminLayout></AdminRoute>
-            } />
-            <Route path="kelola-promosi" element={
-              <AdminRoute><AdminLayout><KelolaPromosiPage refreshData={fetchData} /></AdminLayout></AdminRoute>
-            } />
-            <Route path="kelola-diskon-bertingkat" element={
-              <AdminRoute><AdminLayout><KelolaDiskonBertingkatPage /></AdminLayout></AdminRoute>
-            } />
-          </Route>
-        </Routes>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route path="/*" element={<PublicFacingApp categories={categories} loading={loading} error={error} promotion={activePromotion} appSettings={appSettings} tieredDiscounts={tieredDiscounts} />} />
+            
+            <Route 
+              path="/signin" 
+              element={<GuestRoute><SignIn /></GuestRoute>}
+            />
+            <Route 
+              path="/signup" 
+              element={<GuestRoute><SignUp /></GuestRoute>}
+            />
+            
+            <Route path="/admin"> 
+              <Route index element={
+                <AdminRoute><AdminLayout><Navigate to="/admin/analytics" replace /></AdminLayout></AdminRoute>
+              } />
+              <Route path="analytics" element={
+                <AdminRoute><AdminLayout><AnalyticsPage /></AdminLayout></AdminRoute>
+              } />
+              <Route path="kelola-produk" element={
+                <AdminRoute><AdminLayout><KelolaProdukPage products={allProductsForAdmin} refreshData={fetchData} /></AdminLayout></AdminRoute>
+              } />
+              <Route path="kelola-promosi" element={
+                <AdminRoute><AdminLayout><KelolaPromosiPage refreshData={fetchData} /></AdminLayout></AdminRoute>
+              } />
+              <Route path="kelola-diskon-bertingkat" element={
+                <AdminRoute><AdminLayout><KelolaDiskonBertingkatPage /></AdminLayout></AdminRoute>
+              } />
+            </Route>
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 }

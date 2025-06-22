@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronDown, 
   ChevronRight, 
@@ -11,7 +11,12 @@ import {
   DollarSign,
   Layers,
   Info,
-  BarChart
+  BarChart,
+  ArrowLeft,
+  ArrowRight,
+  Smartphone,
+  HelpCircle,
+  X
 } from 'lucide-react';
 import QuantityControl from './QuantityControl';
 import { roundToNearestHundred, formatPriceWithRounding } from '../utils/priceUtils';
@@ -75,10 +80,118 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedSubCategories, setExpandedSubCategories] = useState<Set<string>>(new Set());
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
+  const [showMobileTutorial, setShowMobileTutorial] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [expandedWithAnimation, setExpandedWithAnimation] = useState<Set<number>>(new Set());
+  const [showSimpleHint, setShowSimpleHint] = useState(false);
+  const [isCatalogVisible, setIsCatalogVisible] = useState(false);
+  const tableRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  const catalogSectionRef = useRef<HTMLDivElement>(null);
 
-  const toggleCategory = (id: number) => setExpandedCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
-  const toggleSubCategory = (id: string) => setExpandedSubCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
-  const toggleBrand = (id: string) => setExpandedBrands(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  // Deteksi mobile dan tutorial
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Intersection Observer untuk mendeteksi section katalog
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && isMobile) {
+          setIsCatalogVisible(true);
+          
+          // Tampilkan tutorial untuk mobile user pertama kali
+          if (!localStorage.getItem('mobile-tutorial-shown')) {
+            setTimeout(() => {
+              setShowMobileTutorial(true);
+              localStorage.setItem('mobile-tutorial-shown', 'true');
+            }, 1000); // Delay 1 detik setelah section terlihat
+          }
+          
+          // Tampilkan hint sederhana
+          setTimeout(() => {
+            setShowSimpleHint(true);
+            setTimeout(() => setShowSimpleHint(false), 3000);
+          }, 2000); // Delay 2 detik setelah section terlihat
+        }
+      },
+      {
+        threshold: 0.5, // Section harus terlihat 50% untuk dianggap visible
+        rootMargin: '0px'
+      }
+    );
+
+    if (catalogSectionRef.current) {
+      observer.observe(catalogSectionRef.current);
+    }
+
+    return () => {
+      if (catalogSectionRef.current) {
+        observer.unobserve(catalogSectionRef.current);
+      }
+    };
+  }, [isMobile]);
+
+  // Deteksi scroll horizontal untuk hint
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!tableRef.current || !isMobile) return;
+      
+      const { scrollLeft, scrollWidth, clientWidth } = tableRef.current;
+      const canScrollRight = scrollLeft < scrollWidth - clientWidth - 1;
+      const canScrollLeft = scrollLeft > 1;
+      
+      // Tampilkan hint jika bisa scroll ke kanan atau kiri
+      if (canScrollRight || canScrollLeft) {
+        setShowScrollHint(true);
+        
+        // Clear timeout dan set baru
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+        
+        scrollTimeoutRef.current = setTimeout(() => {
+          setShowScrollHint(false);
+        }, 3000); // Tampilkan selama 3 detik
+      } else {
+        setShowScrollHint(false);
+      }
+    };
+
+    const tableElement = tableRef.current;
+    if (tableElement) {
+      tableElement.addEventListener('scroll', handleScroll);
+      
+      // Check initial state setelah component mount
+      setTimeout(() => {
+        handleScroll();
+      }, 500);
+      
+      return () => tableElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [isMobile]);
+
+  const toggleCategory = (id: number) => {
+    setExpandedCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  };
+  
+  const toggleSubCategory = (id: string) => {
+    setExpandedSubCategories(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  };
+  
+  const toggleBrand = (id: string) => {
+    setExpandedBrands(p => (p.has(id) ? new Set([...p].filter(x => x !== id)) : new Set([...p, id])));
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -403,33 +516,120 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
     );
   };
 
+  // Mobile Tutorial Component
+  const MobileTutorial = () => (
+    <div className="mobile-tutorial-overlay">
+      <div className="mobile-tutorial-content">
+        <div className="text-center">
+          <Smartphone className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-slate-800 mb-2">Cara Menggunakan Katalog</h3>
+          <div className="space-y-4 text-left">
+            <div className="flex items-start space-x-3">
+              <div className="bg-blue-100 p-2 rounded-lg flex-shrink-0">
+                <ArrowLeft className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800">Geser Kanan-Kiri</p>
+                <p className="text-sm text-slate-600">Geser jari ke kanan atau kiri untuk melihat informasi lengkap produk</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="bg-green-100 p-2 rounded-lg flex-shrink-0">
+                <Package className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800">Klik Kategori</p>
+                <p className="text-sm text-slate-600">Klik nama kategori untuk melihat produk di dalamnya</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="bg-orange-100 p-2 rounded-lg flex-shrink-0">
+                <ShoppingCart className="w-5 h-5 text-orange-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-800">Pilih Jumlah</p>
+                <p className="text-sm text-slate-600">Pilih jumlah yang diinginkan, lalu klik tombol "Beli"</p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowMobileTutorial(false)}
+            className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Saya Mengerti
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Scroll Hint Component
+  const ScrollHint = () => {
+    if (!showScrollHint || !isMobile) return null;
+    
+    return (
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-full text-sm font-medium z-40 shadow-lg animate-pulse">
+        <div className="flex items-center space-x-3">
+          <ArrowLeft className="w-5 h-5" />
+          <span className="font-semibold">Geser untuk melihat lebih</span>
+          <ArrowRight className="w-5 h-5" />
+        </div>
+      </div>
+    );
+  };
+
+  // Simple Hint Component
+  const SimpleHint = () => {
+    if (!showSimpleHint || !isMobile) return null;
+    
+    return (
+      <div className="fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium z-40 animate-pulse">
+        <div className="flex items-center space-x-2">
+          <HelpCircle className="w-4 h-4" />
+          <span>Klik kategori untuk melihat produk</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
+    <div ref={catalogSectionRef} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col">
       {/* Table Title Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white flex items-center space-x-2">
             <Package className="h-6 w-6" />
-            <span>Katalog Material Konstruksi</span>
+            <span>Katalog Produk</span>
           </h2>
-          {isAdminMode && (
-            <div className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
-              Mode Admin
-            </div>
-          )}
+          <div className="flex items-center space-x-2">
+            {isMobile && (
+              <button
+                onClick={() => setShowMobileTutorial(true)}
+                className="bg-white/20 text-white p-2 rounded-lg hover:bg-white/30 transition-colors"
+                title="Bantuan Mobile"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </button>
+            )}
+            {isAdminMode && (
+              <div className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
+                Mode Admin
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Scrollable Table Panel */}
-      <div className="overflow-auto max-h-[70vh]">
+      <div ref={tableRef} className={`overflow-auto max-h-[70vh] relative ${isMobile ? 'mobile-table-container' : ''}`}>
         <table className="w-full min-w-[800px]" style={{ borderSpacing: 0, borderCollapse: 'separate' }}>
           <thead className="sticky top-0 z-10">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/3 bg-slate-100 border-b border-slate-300">Produk</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/4 bg-slate-100 border-b border-slate-300">Spesifikasi</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Harga</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Kuantitas</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300">Aksi</th>
+              <th className={`px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/3 bg-slate-100 border-b border-slate-300 ${isMobile ? 'mobile-table-cell mobile-table-cell-product' : ''}`}>Produk</th>
+              <th className={`px-6 py-4 text-left text-sm font-semibold text-slate-700 w-1/4 bg-slate-100 border-b border-slate-300 ${isMobile ? 'mobile-table-cell mobile-table-cell-specs' : ''}`}>Spesifikasi</th>
+              <th className={`px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300 ${isMobile ? 'mobile-table-cell mobile-table-cell-price' : ''}`}>Harga</th>
+              <th className={`px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300 ${isMobile ? 'mobile-table-cell mobile-table-cell-qty' : ''}`}>Kuantitas</th>
+              <th className={`px-6 py-4 text-left text-sm font-semibold text-slate-700 bg-slate-100 border-b border-slate-300 ${isMobile ? 'mobile-table-cell mobile-table-cell-action' : ''}`}>Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
@@ -457,6 +657,15 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Tutorial */}
+      {showMobileTutorial && <MobileTutorial />}
+      
+      {/* Scroll Hint */}
+      <ScrollHint />
+
+      {/* Simple Hint */}
+      <SimpleHint />
     </div>
   );
 };
