@@ -14,7 +14,7 @@ interface Product {
   name: string;
   price: number;
   image_url?: string;
-  metadata: any;
+  metadata?: any;
   brandName?: string;
   subCategoryName?: string;
 }
@@ -44,9 +44,10 @@ interface ProductShowcaseProps {
   quantities: { [key: string]: number };
   onQuantityChange: (key: string, value: number) => void;
   getDiscountForProduct: (productId: number) => number;
+  onSingleCheckout?: (product: Product, qty: number) => void;
 }
 
-const ProductShowcase: React.FC<ProductShowcaseProps> = ({ categories, quantities, onQuantityChange, getDiscountForProduct }) => {
+const ProductShowcase: React.FC<ProductShowcaseProps> = ({ categories, quantities, onQuantityChange, getDiscountForProduct, onSingleCheckout }) => {
   return (
     <div className="space-y-12">
       {categories.map((category) => {
@@ -100,6 +101,7 @@ const ProductShowcase: React.FC<ProductShowcaseProps> = ({ categories, quantitie
                       quantity={quantities[`product-${product.id}`] || 0}
                       onQuantityChange={(val) => onQuantityChange(`product-${product.id}`, val)}
                       getDiscountForProduct={getDiscountForProduct}
+                      onSingleCheckout={onSingleCheckout}
                     />
                   </SwiperSlide>
                 ))}

@@ -26,7 +26,7 @@ interface Product {
   name: string;
   price: number;
   image_url?: string;
-  metadata: any;
+  metadata?: any;
   unitName?: string;
 }
 
@@ -62,6 +62,7 @@ interface NestedProductTableProps {
   quantities: { [key: string]: number };
   onQuantityChange: (key: string, value: number) => void;
   getDiscountForProduct: (productId: number) => number;
+  onSingleCheckout?: (product: Product, qty: number) => void;
 }
 
 const NestedProductTable: React.FC<NestedProductTableProps> = ({
@@ -76,6 +77,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
   quantities,
   onQuantityChange,
   getDiscountForProduct,
+  onSingleCheckout,
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedSubCategories, setExpandedSubCategories] = useState<Set<string>>(new Set());
@@ -287,20 +289,15 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
                     roundToNearestHundred(product.price * (1 - discountPercent / 100)) : 
                     roundToNearestHundred(product.price);
                   const subtotal = hargaSatuan * qty;
-                  const pesan = `Halo Admin, saya ingin memesan material konstruksi berikut:\n\n${namaProduk}\nHarga Satuan: Rp${hargaSatuan.toLocaleString('id-ID')}\nJumlah: ${qty}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}\n\nTotal: Rp${subtotal.toLocaleString('id-ID')}`;
-                  const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
                   if (qty > 0) {
                     return (
-                      <a
-                        href={waHref}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
                         className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center space-x-2"
-                        style={{ textDecoration: 'none' }}
+                        onClick={() => onSingleCheckout && onSingleCheckout(product, qty)}
                       >
                         <ShoppingCart className="h-4 w-4" />
                         <span>Beli</span>
-                      </a>
+                      </button>
                     );
                   }
                   return (
@@ -599,7 +596,7 @@ const NestedProductTable: React.FC<NestedProductTableProps> = ({
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-white flex items-center space-x-2">
             <Package className="h-6 w-6" />
-            <span>Katalog Produk</span>
+            <span>Katalog Produk </span>
           </h2>
           <div className="flex items-center space-x-2">
             {isMobile && (

@@ -15,6 +15,9 @@ interface Product {
   unitName?: string; // satuan produk
   unit_id?: number; // id unit
   metadata?: any;
+  min_order_qty?: number;
+  min_order_unit?: string;
+  min_order_unit_qty?: number;
 }
 
 interface Category {
@@ -358,6 +361,9 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
       metadata: typeof editingProduct.metadata === 'string' 
         ? JSON.parse(editingProduct.metadata) 
         : editingProduct.metadata,
+      min_order_qty: editingProduct.min_order_qty,
+      min_order_unit: editingProduct.min_order_unit,
+      min_order_unit_qty: editingProduct.min_order_unit_qty,
     };
     
     let sanitizedData: any = {};
@@ -796,6 +802,42 @@ const KelolaProdukPage: React.FC<KelolaProdukPageProps> = ({ products, refreshDa
                   onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Minimum Pembelian</label>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="0"
+                    value={editingProduct.min_order_qty || ''}
+                    onChange={e => setEditingProduct({ ...editingProduct, min_order_qty: parseFloat(e.target.value) || undefined })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Satuan Minimum</label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: DO"
+                    value={editingProduct.min_order_unit || ''}
+                    onChange={e => setEditingProduct({ ...editingProduct, min_order_unit: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Konversi ke Satuan Utama</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="any"
+                    placeholder="Contoh: 12.6"
+                    value={editingProduct.min_order_unit_qty || ''}
+                    onChange={e => setEditingProduct({ ...editingProduct, min_order_unit_qty: parseFloat(e.target.value) || undefined })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

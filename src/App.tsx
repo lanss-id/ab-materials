@@ -24,6 +24,7 @@ const GuestRoute = lazy(() => import('./components/GuestRoute'));
 // Kode yang benar
 const NestedProductTable = lazy(() => import('./components/NestedProductTable'));
 const ProductShowcase = lazy(() => import('./components/ProductShowcase'));
+const KelolaKodePromoPage = lazy(() => import('./components/admin/KelolaKodePromoPage'));
 
 // Impor skeleton secara langsung untuk mencegah CLS
 import TableSkeleton from './components/skeletons/TableSkeleton';
@@ -34,7 +35,7 @@ interface Product {
   name: string;
   price: number;
   image_url?: string;
-  metadata: any;
+  metadata?: any;
   unitName?: string;
 }
 
@@ -81,12 +82,60 @@ function LoadingFallback() {
 function PublicFacingApp({ categories, loading, error, promotion, appSettings, tieredDiscounts }: { categories: Category[], loading: boolean, error: string | null, promotion: Promotion | null, appSettings: any, tieredDiscounts: any[] }) {
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
   const [isCheckoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [checkoutMode, setCheckoutMode] = useState<'cart' | 'single'>('cart');
+  const [checkoutProduct, setCheckoutProduct] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'table' | 'showcase'>('table');
   const [sortOption, setSortOption] = useState('default');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   
   const handleQuantityChange = (key: string, value: number) => {
     setQuantities(prev => ({ ...prev, [key]: value < 0 ? 0 : value }));
+  };
+
+  // Helper untuk parsing minimum order dari metadata
+  const parseMinOrder = (product: Product) => {
+    const meta = product.metadata || {};
+    return {
+      min_order_qty: meta.min_order_qty,
+      min_order_unit: meta.min_order_unit,
+      min_order_unit_qty: meta.min_order_unit_qty,
+    };
+  };
+
+  // Handler untuk checkout satu produk
+  const openSingleCheckout = (product: Product, qty: number) => {
+    let brandName = (product as any).brandName;
+    if (!brandName) {
+      for (const category of categories) {
+        for (const brand of [...category.brands, ...category.sub_categories.flatMap(sc => sc.brands)]) {
+          if (brand.products.some(p => p.id === product.id)) {
+            brandName = brand.name;
+            break;
+          }
+        }
+        if (brandName) break;
+      }
+    }
+    // Cari produk lengkap dari allProducts
+    const fullProduct = allProducts.find(p => p.id === product.id);
+    const discountPercent = getDiscountForProduct(product.id);
+    const finalPrice = discountPercent > 0 ? (product.price * (1 - discountPercent / 100)) : product.price;
+    setCheckoutProduct({
+      ...(fullProduct || product),
+      quantity: qty,
+      originalPrice: product.price,
+      finalPrice,
+      brandName: brandName || '',
+    });
+    setCheckoutMode('single');
+    setCheckoutModalOpen(true);
+  };
+  // Handler untuk checkout seluruh keranjang
+  const openCartCheckout = () => {
+    setCheckoutMode('cart');
+    setCheckoutProduct(null);
+    setCheckoutModalOpen(true);
   };
 
   const getDiscountForProduct = (productId: number): number => {
@@ -114,7 +163,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
   const selectedSortOption = sortOptions.find(option => option.value === sortOption) || sortOptions[0];
 
   const getCartItems = () => {
-    const items: (Product & { quantity: number; finalPrice: number; brandName: string; originalPrice: number; })[] = [];
+    const items: (Product & { quantity: number; finalPrice: number; brandName: string; originalPrice: number; min_order_qty?: number; min_order_unit?: string; min_order_unit_qty?: number; })[] = [];
     categories.forEach(category => {
       const allBrands = [...category.brands, ...category.sub_categories.flatMap(sc => sc.brands)];
       allBrands.forEach(brand => {
@@ -123,8 +172,10 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
           if (quantities[key] > 0) {
             const discountPercent = getDiscountForProduct(product.id);
             const finalPrice = discountPercent > 0 ? (product.price * (1 - discountPercent / 100)) : product.price;
+            // Cari produk lengkap dari allProducts
+            const fullProduct = allProducts.find(p => p.id === product.id);
             items.push({
-              ...product,
+              ...(fullProduct || product),
               quantity: quantities[key],
               originalPrice: product.price,
               finalPrice: finalPrice,
@@ -358,6 +409,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
                     quantities={quantities}
                     onQuantityChange={handleQuantityChange}
                     getDiscountForProduct={getDiscountForProduct}
+                    onSingleCheckout={openSingleCheckout}
                   />
                 ) : (
                   <ProductShowcase 
@@ -365,6 +417,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
                     quantities={quantities}
                     onQuantityChange={handleQuantityChange}
                     getDiscountForProduct={getDiscountForProduct}
+                    onSingleCheckout={openSingleCheckout}
                   />
                 )}
               </Suspense>
@@ -422,7 +475,7 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
       {totalItemsInCart > 0 && (
         <div className="sticky bottom-0 w-full p-4 bg-gradient-to-t from-slate-200 to-transparent z-40">
            <button
-            onClick={() => setCheckoutModalOpen(true)}
+            onClick={openCartCheckout}
             className="w-full max-w-md mx-auto flex items-center justify-between px-6 py-4 bg-orange-600 text-white font-bold rounded-xl shadow-2xl hover:bg-orange-700 transition-transform transform hover:scale-105"
           >
             <div className="flex items-center space-x-3">
@@ -438,9 +491,11 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
         <CheckoutModal
           isOpen={isCheckoutModalOpen}
           onClose={() => setCheckoutModalOpen(false)}
-          cartItems={cartItems}
-          totalBelanjaBruto={totalBelanjaBruto}
+          cartItems={checkoutMode === 'single' && checkoutProduct ? [checkoutProduct] : cartItems}
+          totalBelanjaBruto={checkoutMode === 'single' && checkoutProduct ? checkoutProduct.finalPrice * checkoutProduct.quantity : totalBelanjaBruto}
           appSettings={appSettings}
+          checkoutMode={checkoutMode}
+          checkoutProduct={checkoutProduct}
         />
       )}
     </div>
@@ -455,12 +510,13 @@ function App() {
   const [activePromotion, setActivePromotion] = useState<Promotion | null>(null);
   const [appSettings, setAppSettings] = useState<any>({});
   const [tieredDiscounts, setTieredDiscounts] = useState<any[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   const fetchData = async () => {
     setLoading(true);
     setError(null);
 
-    const [productsResponse, promotionResponse, settingsResponse, tieredDiscountsResponse] = await Promise.all([
+    const [productsResponse, promotionResponse, settingsResponse, tieredDiscountsResponse, allProductsResponse] = await Promise.all([
       supabase
         .from('categories')
         .select(`
@@ -469,14 +525,18 @@ function App() {
             id, name, brands (
               id, name, products (
                 id, name, price, image_url, metadata, unit_id,
-                units (name)
+                units (name),
+                min_order_qty, min_order_unit, min_order_unit_qty,
+                brand_id
               )
             )
           ),
           brands (
             id, name, products (
               id, name, price, image_url, metadata, unit_id,
-              units (name)
+              units (name),
+              min_order_qty, min_order_unit, min_order_unit_qty,
+              brand_id
             )
           )
         `),
@@ -494,10 +554,14 @@ function App() {
         .from('tiered_discounts')
         .select('*')
         .eq('is_active', true)
-        .order('min_spend', { ascending: true })
+        .order('min_spend', { ascending: true }),
+      supabase
+        .from('products')
+        .select('id, name, price, image_url, metadata, min_order_qty, min_order_unit, min_order_unit_qty, brand_id, unit_id')
     ]);
 
     const { data: productsData, error: productsError } = productsResponse;
+    // DEBUG: Log hasil query Supabase
     if (productsError) {
       console.error('Error fetching products:', productsError);
       setError('Terjadi kesalahan saat mengambil data produk dari server. Silakan coba lagi nanti.');
@@ -515,7 +579,10 @@ function App() {
             ...brand,
             products: brand.products.map((p: any) => ({
               ...p,
-              unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit'
+              unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit',
+              min_order_qty: p.min_order_qty,
+              min_order_unit: p.min_order_unit,
+              min_order_unit_qty: p.min_order_unit_qty,
             }))
           })),
           sub_categories: category.sub_categories.map((sc: any) => ({
@@ -524,7 +591,10 @@ function App() {
               ...brand,
               products: brand.products.map((p: any) => ({
                 ...p,
-                unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit'
+                unitName: (p.units && typeof p.units === 'object' && 'name' in p.units) ? p.units.name : 'per unit',
+                min_order_qty: p.min_order_qty,
+                min_order_unit: p.min_order_unit,
+                min_order_unit_qty: p.min_order_unit_qty,
               }))
             }))
           }))
@@ -575,6 +645,14 @@ function App() {
             ...prev,
             tiered_discounts: tieredDiscountsData
         }));
+    }
+
+    const { data: allProducts, error: allProductsError } = allProductsResponse;
+    if (allProductsError) {
+      console.error('Error fetching all products:', allProductsError);
+      setError('Terjadi kesalahan saat mengambil data produk dari server. Silakan coba lagi nanti.');
+    } else if (allProducts) {
+      setAllProducts(allProducts);
     }
 
     setLoading(false);
@@ -650,6 +728,9 @@ function App() {
               } />
               <Route path="kelola-diskon-bertingkat" element={
                 <AdminRoute><AdminLayout><KelolaDiskonBertingkatPage /></AdminLayout></AdminRoute>
+              } />
+              <Route path="kelola-kode-promo" element={
+                <AdminRoute><AdminLayout><KelolaKodePromoPage /></AdminLayout></AdminRoute>
               } />
             </Route>
           </Routes>

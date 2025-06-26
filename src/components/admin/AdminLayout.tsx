@@ -16,6 +16,7 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { to: '/admin/kelola-produk', label: 'Kelola Produk', icon: Package },
     { to: '/admin/kelola-promosi', label: 'Kelola Promosi', icon: Tag },
     { to: '/admin/kelola-diskon-bertingkat', label: 'Diskon Checkout', icon: Gift },
+    { to: '/admin/kelola-kode-promo', label: 'Kelola Kode Promo', icon: Gift },
   ];
 
   return (

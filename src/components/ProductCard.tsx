@@ -21,6 +21,7 @@ interface ProductCardProps {
   getDiscountForProduct: (productId: number) => number;
   quantity: number;
   onQuantityChange: (value: number) => void;
+  onSingleCheckout?: (product: Product, qty: number) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -31,7 +32,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isPromoted = false,
   getDiscountForProduct,
   quantity,
-  onQuantityChange
+  onQuantityChange,
+  onSingleCheckout
 }) => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -109,21 +111,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
             const roundedFinalPrice = roundToNearestHundred(finalPrice);
             const subtotal = roundedFinalPrice * quantity;
             const path = `${categoryName}${subCategoryName ? ` > ${subCategoryName}` : ''}${brandName ? ` > ${brandName}` : ''}`;
-            const pesan = `Halo Admin, saya ingin memesan:\n\n*Produk:* ${productName}\n*Kategori:* ${path}\n*Harga Satuan:* Rp${roundedFinalPrice.toLocaleString('id-ID')}\n*Jumlah:* ${quantity}\n*Subtotal:* Rp${subtotal.toLocaleString('id-ID')}\n\nTerima kasih.`;
-            const waHref = `https://wa.me/6285187230007?text=${encodeURIComponent(pesan)}`;
             
             if (quantity > 0) {
               return (
-                <a
-                  href={waHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
                   className="flex-1 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 group"
-                  style={{ textDecoration: 'none' }}
+                  onClick={() => onSingleCheckout && onSingleCheckout(product, quantity)}
                 >
                   <ShoppingCart className="h-4 w-4 group-hover:animate-bounce" />
                   <span>Beli</span>
-                </a>
+                </button>
               );
             }
             return (
@@ -136,11 +133,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </button>
             );
           })()}
-          <button
-            className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
-          >
-            <Info className="h-4 w-4" />
-          </button>
         </div>
       </div>
     </div>
