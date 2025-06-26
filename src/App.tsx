@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { supabase } from './supabaseClient';
-import { Toaster } from 'sonner';
+import { Toaster, toast } from 'sonner';
 import { 
   List, LayoutGrid, Loader2, ServerCrash, ShoppingCart, 
   MapPin, Phone, Mail, FileText
@@ -37,6 +37,9 @@ interface Product {
   image_url?: string;
   metadata?: any;
   unitName?: string;
+  min_order_qty?: number;
+  min_order_unit?: string;
+  min_order_unit_qty?: number;
 }
 
 interface Brand {
@@ -90,6 +93,21 @@ function PublicFacingApp({ categories, loading, error, promotion, appSettings, t
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   
   const handleQuantityChange = (key: string, value: number) => {
+    // Cari produk terkait
+    let productId: number | null = null;
+    if (key.startsWith('product-')) {
+      productId = parseInt(key.replace('product-', ''));
+    }
+    let product: Product | undefined = undefined;
+    if (productId) {
+      product = allProducts.find(p => p.id === productId);
+    }
+    // Cek minimum order
+    if (product && product.min_order_qty && value > 0 && value < product.min_order_qty) {
+      setQuantities(prev => ({ ...prev, [key]: product!.min_order_qty as number }));
+      toast.warning(`Minimum pembelian untuk produk ini adalah ${product.min_order_qty} ${product.min_order_unit || ''}`);
+      return;
+    }
     setQuantities(prev => ({ ...prev, [key]: value < 0 ? 0 : value }));
   };
 

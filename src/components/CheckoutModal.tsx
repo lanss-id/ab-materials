@@ -99,10 +99,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const discountAmount = (total * discountPercentage) / 100;
     const totalAfterDiscount = total - discountAmount;
     const finalTotal = Math.round(totalAfterDiscount / 100) * 100;
+    // Perbaiki pengecekan free_shipping
+    const isFreeShipping = applicableTier.free_shipping === true || applicableTier.free_shipping === 'true';
     return {
       discountPercentage,
       discountAmount,
-      isFreeShipping: applicableTier.free_shipping || false,
+      isFreeShipping,
       finalTotal,
       discountMessage: applicableTier.description || '',
     };
@@ -111,7 +113,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   // Hitung total untuk displayItems (support minimum pembelian)
   const displayTotal = patchedCartItems.reduce((acc, item) => {
     if (item.min_order_qty && item.min_order_unit && item.min_order_unit_qty) {
-      return acc + (item.finalPrice * item.min_order_unit_qty);
+      return acc + (item.finalPrice * item.quantity * item.min_order_unit_qty);
     }
     return acc + (item.finalPrice * item.quantity);
   }, 0);
@@ -189,17 +191,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
 
     const itemsList = patchedCartItems.map(item => {
-      // Perhitungan subtotal harus sesuai minimum order
       let subtotal = 0;
       let qtyLabel = '';
       if (item.min_order_qty && item.min_order_unit && item.min_order_unit_qty) {
-        subtotal = item.finalPrice * item.min_order_unit_qty;
-        qtyLabel = `${item.min_order_qty} ${item.min_order_unit} (= ${item.min_order_unit_qty} ${item.unitName || ''})`;
+        subtotal = item.finalPrice * item.quantity * item.min_order_unit_qty;
+        qtyLabel = `${item.quantity} ${item.min_order_unit} (= ${item.quantity * item.min_order_unit_qty} ${item.unitName || ''})`;
       } else {
         subtotal = item.quantity * item.finalPrice;
         qtyLabel = `${item.quantity} ${item.unitName || ''}`;
       }
-      return `${item.name} (${item.brandName})\nHarga: Rp${item.finalPrice.toLocaleString('id-ID')} x ${qtyLabel}\nSubtotal: Rp${subtotal.toLocaleString('id-ID')}`;
+      return `${item.name} (${item.brandName || ''}): ${qtyLabel} x Rp${item.finalPrice.toLocaleString('id-ID')} = Rp${subtotal.toLocaleString('id-ID')}`;
     }).join('\n\n');
 
     let shippingInfo = '';
@@ -289,36 +290,26 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   <div className="bg-slate-50 rounded-xl p-4">
                     <h3 className="font-semibold text-slate-800 mb-3">Produk yang Dipilih</h3>
                     <div className="space-y-2 text-sm max-h-40 overflow-y-auto pr-2">
-                      {patchedCartItems.map((item) => {
-                        // Cek minimum pembelian
-                        const minQty = item.min_order_qty;
-                        const minUnit = item.min_order_unit;
-                        const minUnitQty = item.min_order_unit_qty;
-                        const satuanUtama = item.unitName || '';
-                        if (minQty && minUnit && minUnitQty) {
-                          return (
-                            <div key={item.id} className="flex flex-col gap-1 border-b border-slate-100 pb-2 mb-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-slate-700 font-semibold">{item.name} ({item.brandName})</span>
-                              </div>
-                              <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                                <span>Jumlah: <b>{minQty} {minUnit}</b> <span className="text-slate-400">(={minUnitQty} {satuanUtama})</span></span>
-                                <span>Harga per {satuanUtama}: <b>Rp{item.finalPrice.toLocaleString('id-ID')}</b></span>
-                              </div>
-                              <div className="flex flex-wrap gap-2 text-xs text-slate-600">
-                                <span>Subtotal: <b>Rp{(item.finalPrice * minUnitQty).toLocaleString('id-ID')}</b></span>
-                              </div>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <div key={item.id} className="flex justify-between items-center">
-                              <span className="text-slate-600">{item.name} ({item.brandName})</span>
-                              <span className="font-medium">{item.quantity} x Rp{item.finalPrice.toLocaleString('id-ID')}</span>
-                            </div>
-                          );
-                        }
-                      })}
+                      {patchedCartItems.map((item, idx) => (
+                        <div key={item.id} className="mb-2 flex flex-col gap-1 border-b border-slate-100 pb-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-slate-800 flex-shrink">{item.name} {item.brandName ? `(${item.brandName})` : ''}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs text-slate-700">
+                            <span>
+                              {item.min_order_qty && item.min_order_unit && item.min_order_unit_qty
+                                ? `${item.quantity} ${item.min_order_unit} (= ${(item.quantity * item.min_order_unit_qty).toLocaleString('id-ID')} ${item.unitName || ''})`
+                                : `${item.quantity} ${item.unitName || ''}`}
+                              {' '}Harga {item.unitName || ''}
+                            </span>
+                            <span className="font-bold text-sm text-right text-gray-600 min-w-[80px] flex-grow-0">Rp{item.finalPrice.toLocaleString('id-ID')}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs text-slate-700">
+                            <span>Subtotal:</span>
+                            <span className="font-bold text-lg text-right text-gray-800 min-w-[120px] flex-grow-0">Rp{(item.finalPrice * (item.min_order_qty && item.min_order_unit_qty ? item.quantity * item.min_order_unit_qty : item.quantity)).toLocaleString('id-ID')}</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                     
                     <div className="border-t border-slate-200 mt-3 pt-3 space-y-2">
@@ -344,6 +335,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                         <span>Total Pembayaran</span>
                         <span>Rp{discountInfo.finalTotal.toLocaleString('id-ID')}</span>
                       </div>
+                      {discountInfo.isFreeShipping && (
+                        <div className="flex items-center justify-end mt-1">
+                          <span className="bg-green-100 text-green-800 font-bold px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                            <Truck className="inline w-4 h-4" /> Gratis Ongkir!
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
